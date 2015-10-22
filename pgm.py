@@ -4,6 +4,7 @@ import sys
 import math
 import random
 import collections
+import matplotlib.pyplot as plt
 import itertools
 import operator
 import cProfile
@@ -102,6 +103,21 @@ def pgm(net1, net2, seeds, r): #seeds is a list of tups
         used.append(curr_pair)
     return used
 
+def generate_skg(order=11):
+    gen = np.array([[0.99, 0.9], [0.9, 0.5]])
+    skg = gen.copy()
+    for x in xrange(order-1):
+        skg = np.kron(skg, gen)
+    skg_sample = np.zeros_like(skg)
+    for x in xrange(skg.shape[0]):
+        for y in xrange(skg.shape[1]):
+            if random.random() < skg[x,y]:
+                skg_sample[x,y] = 1
+    plt.imshow(skg_sample)
+    plt.show()
+    #net = nx.from_numpy_matrix(skg_sample)
+    #return net
+
 def score_easy(pgm_res):
     #only works for the choicing model
     #not on real dataset, in other words
@@ -110,3 +126,5 @@ def score_easy(pgm_res):
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
+    generate_skg()
+    #print generate_skg().edges()
