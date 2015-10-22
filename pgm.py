@@ -130,7 +130,9 @@ def score_easy(pgm_res):
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     net = generate_skg()
-    src_net, tgt_net = select_net(net, p=0.9), select_net(net, p=0.9)
-    seeds = get_seeds(src_net, tgt_net, 200)
-    print len(src_net.edges()), len(tgt_net.edges())
-    print len(pgm(src_net, tgt_net, seeds, 3))
+    src_net, tgt_net = select_net(net), select_net(net)
+    seeds = get_seeds(src_net, tgt_net, 40)
+    print len(src_net.nodes()), len(tgt_net.nodes())
+    res = pgm(src_net, tgt_net, seeds, 5)
+    print len(res)
+    print len(set(res))
