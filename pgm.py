@@ -92,7 +92,8 @@ def pgm(net1, net2, seeds, r): #seeds is a list of tups
             marks[neighbor] += 1
             t2 += 1
             if t2 % 1000 == 0:
-                print t2
+                #print t2
+                pass
             if t2 % 250000 == 0:
                 #this is an awful hack
                 break
@@ -106,7 +107,7 @@ def pgm(net1, net2, seeds, r): #seeds is a list of tups
     return used
 
 def generate_skg(order=11):
-    gen = np.array([[0.99, 0.7], [0.7, 0.1]])
+    gen = np.array([[0.99, 0.8], [0.8, 0.3]])
     skg = gen.copy()
     for x in xrange(order-1):
         skg = np.kron(skg, gen)
@@ -130,6 +131,6 @@ if __name__ == "__main__":
     random.seed(123456) #different seed :)
     net = generate_skg()
     src_net, tgt_net = select_net(net, p=0.9), select_net(net, p=0.9)
-    #print len(src_net.edges()), len(tgt_net.edges())
-    seeds = get_seeds(src_net, tgt_net, 30)
-    print pgm(src_net, tgt_net, seeds, 5)
+    seeds = get_seeds(src_net, tgt_net, 200)
+    print len(src_net.edges()), len(tgt_net.edges())
+    print len(pgm(src_net, tgt_net, seeds, 3))
