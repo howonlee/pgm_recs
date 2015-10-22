@@ -36,6 +36,10 @@ def path_to_seeds(path):
         rset.add(y)
     return seeds
 
+def l2_norm(x, y):
+    #because I am too lazy to actually figure out how to do it with np norm
+    return np.sqrt(x ** 2 + y ** 2)
+
 def get_seeds(src_net, tgt_net, num_seeds):
     #we're going to need to skip some, friend
     src_degs = sorted(nx.degree(src_net).items(), key=operator.itemgetter(1), reverse=True)
@@ -105,7 +109,7 @@ if __name__ == "__main__":
     random.seed(123456) #different seed :)
     net = generate_skg()
     src_net, tgt_net = select_net(net), select_net(net)
-    seeds = get_seeds(src_net, tgt_net, 40)
+    seeds = get_seeds(src_net, tgt_net, 7)
     print len(src_net.edges()), len(tgt_net.edges())
     res = normal_pgm(src_net, tgt_net, seeds, 5)
     print len(res)
