@@ -73,7 +73,7 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
 def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
     marks = collections.defaultdict(int)
     imp_t, imp_h = set(), set()
-    unused, used = seeds[:], []
+    unused, used, matched = seeds[:], [], []
     random.shuffle(unused) # mutates!
     while unused:
         t2 = 0
