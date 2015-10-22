@@ -91,6 +91,8 @@ def pgm(net1, net2, seeds, r): #seeds is a list of tups
                 continue
             marks[neighbor] += 1
             t2 += 1
+            if t2 % 1000 == 0:
+                print t2
             if t2 % 250000 == 0:
                 #this is an awful hack
                 break
@@ -129,4 +131,5 @@ if __name__ == "__main__":
     net = generate_skg()
     src_net, tgt_net = select_net(net, p=0.9), select_net(net, p=0.9)
     #print len(src_net.edges()), len(tgt_net.edges())
-    print get_seeds(src_net, tgt_net, 30)
+    seeds = get_seeds(src_net, tgt_net, 30)
+    print pgm(src_net, tgt_net, seeds, 5)
