@@ -107,7 +107,7 @@ def pgm(net1, net2, seeds, r): #seeds is a list of tups
     return used
 
 def generate_skg(order=11):
-    gen = np.array([[0.99, 0.8], [0.8, 0.3]])
+    gen = np.array([[0.99, 0.7], [0.7, 0.1]])
     skg = gen.copy()
     for x in xrange(order-1):
         skg = np.kron(skg, gen)
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     net = generate_skg()
     src_net, tgt_net = select_net(net), select_net(net)
     seeds = get_seeds(src_net, tgt_net, 40)
-    print len(src_net.nodes()), len(tgt_net.nodes())
+    print len(src_net.edges()), len(tgt_net.edges())
     res = pgm(src_net, tgt_net, seeds, 5)
     print len(res)
     print len(set(res))
