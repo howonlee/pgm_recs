@@ -104,7 +104,7 @@ def pgm(net1, net2, seeds, r): #seeds is a list of tups
     return used
 
 def generate_skg(order=11):
-    gen = np.array([[0.99, 0.9], [0.9, 0.5]])
+    gen = np.array([[0.99, 0.7], [0.7, 0.1]])
     skg = gen.copy()
     for x in xrange(order-1):
         skg = np.kron(skg, gen)
@@ -113,10 +113,10 @@ def generate_skg(order=11):
         for y in xrange(skg.shape[1]):
             if random.random() < skg[x,y]:
                 skg_sample[x,y] = 1
-    plt.imshow(skg_sample)
-    plt.show()
-    #net = nx.from_numpy_matrix(skg_sample)
-    #return net
+    #plt.imshow(skg_sample)
+    #plt.show()
+    net = nx.from_numpy_matrix(skg_sample)
+    return net
 
 def score_easy(pgm_res):
     #only works for the choicing model
@@ -126,5 +126,7 @@ def score_easy(pgm_res):
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    generate_skg()
-    #print generate_skg().edges()
+    net = generate_skg()
+    src_net, tgt_net = select_net(net, p=0.9), select_net(net, p=0.9)
+    #print len(src_net.edges()), len(tgt_net.edges())
+    print get_seeds(src_net, tgt_net, 30)
