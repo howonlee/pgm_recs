@@ -74,7 +74,39 @@ def get_seeds(src_net, tgt_net, num_seeds):
     seeds = path_to_seeds(path)
     return seeds
 
-def pgm(net1, net2, seeds, r): #seeds is a list of tups
+def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
+    marks = collections.defaultdict(int)
+    #heap?
+    imp_1 = {} #impossible tails
+    imp_2 = {} #impossible heads
+    unused = seeds[:]
+    used = []
+    #to make it online algo: unused should be of high priority, but used should also be taken fron
+    while unused:
+        t2 = 0
+        curr_pair = unused.pop(random.randint(0,len(unused)-1))
+        for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
+            #take the filter out of the loops
+            if imp_1.has_key(neighbor[0]) or imp_2.has_key(neighbor[1]):
+                continue
+            marks[neighbor] += 1
+            t2 += 1
+            if t2 % 1000 == 0:
+                #print t2
+                pass
+            if t2 % 250000 == 0:
+                #this is an awful hack
+                break
+            #take it out, I guess?
+            if marks[neighbor] > r:
+                unused.append(neighbor)
+                imp_1[neighbor[0]] = True
+                imp_2[neighbor[1]] = True
+        #maximum of the marks here, but later
+        used.append(curr_pair)
+    return used
+
+def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
     marks = collections.defaultdict(int)
     #heap?
     imp_1 = {} #impossible tails
