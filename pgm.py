@@ -73,7 +73,7 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
 def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
     marks = collections.defaultdict(int)
     imp_t, imp_h = set(), set()
-    unused, used, matched = seeds[:], [], []
+    unused, matched, candidates = seeds[:], [], []
     random.shuffle(unused) # mutates!
     while unused:
         t2 = 0
@@ -87,8 +87,8 @@ def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
                 unused.append(neighbor)
                 imp_t.add(neighbor[0])
                 imp_h.add(neighbor[1])
-        used.append(curr_pair)
-    return used
+        matched.append(curr_pair)
+    return matched
 
 def generate_skg(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
@@ -105,12 +105,28 @@ def generate_skg(order=11):
     net = nx.from_numpy_matrix(skg_sample)
     return net
 
+def read_small_data():
+    user_maps = collections.defaultdict(set)
+    with open("./data/u.data") as small_file:
+        for line in small_file:
+            user_id, item_id, rating, timestamp = map(int, line.split())
+            user_maps[item_id].add(user_id)
+    net = nx.Graph()
+    for _, user_set in user_maps.iteritems():
+        for pair in itertools.combinations(user_set, 2):
+            net.add_edge(*pair)
+    return net
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    net = generate_skg()
-    src_net, tgt_net = select_net(net), select_net(net)
-    seeds = get_seeds(src_net, tgt_net, 7)
-    print len(src_net.edges()), len(tgt_net.edges())
-    res = normal_pgm(src_net, tgt_net, seeds, 5)
-    print len(res)
-    print len(set(res))
+    net = read_small_data()
+    print "read the user data"
+    net_arr = nx.to_numpy_matrix(net)
+    plt.imshow(net_arr)
+    plt.show()
+    #src_net, tgt_net = select_net(net), read_small_data()
+    #seeds = get_seeds(src_net, tgt_net, 7)
+    #print len(src_net.edges()), len(tgt_net.edges())
+    #res = normal_pgm(src_net, tgt_net, seeds, 5)
+    #print len(res)
+    #print len(set(res))
