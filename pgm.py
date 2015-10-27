@@ -115,15 +115,17 @@ def read_small_data():
     for _, user_set in user_maps.iteritems():
         for pair in itertools.combinations(user_set, 2):
             net.add_edge(*pair)
+    # similarities. Now.
     return net
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     net = read_small_data()
+    print len(net.edges()), len(net.nodes())
     print "read the user data"
-    net_arr = nx.to_numpy_matrix(net)
-    plt.imshow(net_arr)
-    plt.show()
+    #net_arr = nx.to_numpy_matrix(net)
+    #plt.imshow(net_arr)
+    #plt.show()
     #src_net, tgt_net = select_net(net), read_small_data()
     #seeds = get_seeds(src_net, tgt_net, 7)
     #print len(src_net.edges()), len(tgt_net.edges())
