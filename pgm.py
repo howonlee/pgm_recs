@@ -36,9 +36,9 @@ def path_to_seeds(path):
         rset.add(y)
     return seeds
 
-def l1_norm(x, y):
+def l2_norm(x, y):
     #because I am too lazy to actually figure out how to do it with np norm
-    return np.abs(x) + np.abs(y)
+    return np.sqrt(x ** 2 + y ** 2)
 
 def get_seeds(src_net, tgt_net, num_seeds):
     #we're going to need to skip some, friend
@@ -46,7 +46,7 @@ def get_seeds(src_net, tgt_net, num_seeds):
     tgt_degs = sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)
     src_dists = list(itertools.islice(map(operator.itemgetter(1), src_degs), num_seeds))
     tgt_dists = list(itertools.islice(map(operator.itemgetter(1), tgt_degs), num_seeds))
-    dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l1_norm)
+    dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l2_norm)
     seeds = path_to_seeds(path)
     return seeds
 
@@ -109,16 +109,27 @@ def generate_skg_net(order=11):
     arr = generate_skg_arr(order)
     return nx.from_numpy_matrix(arr)
 
-def read_small_data():
+def read_small_data(sample=4000, offset=0):
     """
     Got to arrange this for the user (or item) similarities, have a threshhold for similarities
     """
     user_maps = collections.defaultdict(set)
+    max_id = 0
     with open("./data/u.data") as small_file:
         for line in small_file:
+            offset -= 1
+            if offset > 0:
+                continue
+            sample -= 1
             user_id, item_id, rating, timestamp = map(int, line.split())
+            if user_id > max_id:
+                max_id = user_id
             user_maps[item_id].add(user_id)
+            if sample <= 0:
+                break
     net = nx.Graph()
+    for x in xrange(max_id):
+        net.add_node(x)
     for _, user_set in user_maps.iteritems():
         for pair in itertools.combinations(user_set, 2):
             net.add_edge(*pair)
@@ -144,15 +155,10 @@ def shuffle_arr(arr, num_swaps=10000):
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
-    src_net = generate_skg_net()
-    tgt_net, swaps = shuffle_arr(generate_skg_arr())
-    tgt_net = nx.from_numpy_matrix(tgt_net)
+    src_net = read_small_data()
+    tgt_net = read_small_data(offset=4000)
     seeds = get_seeds(src_net, tgt_net, 100)
     res = expando_pgm(src_net, tgt_net, seeds, 5)
-    print "swaps: ", swaps
-    print "========="
-    print "========="
-    print "========="
     print "========="
     print "res: ", res
     print len(res)
