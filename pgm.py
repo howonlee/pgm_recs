@@ -124,6 +124,13 @@ def read_small_data():
     # similarities. Now.
     return net
 
+def shuffle_net(arr):
+    """
+    Take it in matrix form
+    """
+    # shuffle here!
+    return arr
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
@@ -131,5 +138,6 @@ if __name__ == "__main__":
     seeds = get_seeds(src_net, tgt_net, 100)
     print len(src_net.edges()), len(tgt_net.edges())
     res = expando_pgm(src_net, tgt_net, seeds, 5)
+    print res
     print len(res)
     print len(set(res))
