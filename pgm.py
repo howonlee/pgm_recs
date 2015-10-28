@@ -51,6 +51,9 @@ def get_seeds(src_net, tgt_net, num_seeds):
     return seeds
 
 def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
+    """
+    Gets about 1200 matches on 2048 SKG, selected 90%
+    """
     marks = collections.defaultdict(int)
     imp_t, imp_h = set(), set()
     unused, used = seeds[:], []
@@ -106,6 +109,9 @@ def generate_skg(order=11):
     return net
 
 def read_small_data():
+    """
+    Got to arrange this for the user (or item) similarities, have a threshhold for similarities
+    """
     user_maps = collections.defaultdict(set)
     with open("./data/u.data") as small_file:
         for line in small_file:
@@ -120,15 +126,10 @@ def read_small_data():
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    net = read_small_data()
-    print len(net.edges()), len(net.nodes())
-    print "read the user data"
-    #net_arr = nx.to_numpy_matrix(net)
-    #plt.imshow(net_arr)
-    #plt.show()
-    #src_net, tgt_net = select_net(net), read_small_data()
-    #seeds = get_seeds(src_net, tgt_net, 7)
-    #print len(src_net.edges()), len(tgt_net.edges())
-    #res = normal_pgm(src_net, tgt_net, seeds, 5)
-    #print len(res)
-    #print len(set(res))
+    #net = generate_skg()
+    src_net, tgt_net = generate_skg(), generate_skg()
+    seeds = get_seeds(src_net, tgt_net, 100)
+    print len(src_net.edges()), len(tgt_net.edges())
+    res = expando_pgm(src_net, tgt_net, seeds, 5)
+    print len(res)
+    print len(set(res))
