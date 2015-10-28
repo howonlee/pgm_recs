@@ -36,9 +36,9 @@ def path_to_seeds(path):
         rset.add(y)
     return seeds
 
-def l2_norm(x, y):
+def l1_norm(x, y):
     #because I am too lazy to actually figure out how to do it with np norm
-    return np.sqrt(x ** 2 + y ** 2)
+    return np.abs(x) + np.abs(y)
 
 def get_seeds(src_net, tgt_net, num_seeds):
     #we're going to need to skip some, friend
@@ -46,7 +46,7 @@ def get_seeds(src_net, tgt_net, num_seeds):
     tgt_degs = sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)
     src_dists = list(itertools.islice(map(operator.itemgetter(1), src_degs), num_seeds))
     tgt_dists = list(itertools.islice(map(operator.itemgetter(1), tgt_degs), num_seeds))
-    dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l2_norm)
+    dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l1_norm)
     seeds = path_to_seeds(path)
     return seeds
 
@@ -93,7 +93,7 @@ def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
         matched.append(curr_pair)
     return matched
 
-def generate_skg(order=11):
+def generate_skg_arr(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
     skg = gen.copy()
     for x in xrange(order-1):
@@ -103,10 +103,11 @@ def generate_skg(order=11):
         for y in xrange(skg.shape[1]):
             if random.random() < skg[x,y]:
                 skg_sample[x,y] = 1
-    #plt.imshow(skg_sample)
-    #plt.show()
-    net = nx.from_numpy_matrix(skg_sample)
-    return net
+    return skg_sample
+
+def generate_skg_net(order=11):
+    arr = generate_skg_arr(order)
+    return nx.from_numpy_matrix(arr)
 
 def read_small_data():
     """
@@ -124,20 +125,35 @@ def read_small_data():
     # similarities. Now.
     return net
 
-def shuffle_net(arr):
+def perform_swap(arr, swap):
+    first, second = swap
+    arr[:, [first, second]] = arr[:, [second, first]]
+    arr[[first, second], :] = arr[[second, first], :]
+    return arr
+
+def shuffle_arr(arr, num_swaps=10000):
     """
     Take it in matrix form
     """
-    # shuffle here!
-    return arr
+    swaps = [(random.randint(0, arr.shape[0]-1), random.randint(0, arr.shape[0]-1)) for x in xrange(num_swaps)]
+    new_arr = arr.copy()
+    for swap in swaps:
+        new_arr = perform_swap(new_arr, swap)
+    return arr, swaps
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
-    src_net, tgt_net = generate_skg(), generate_skg()
+    src_net = generate_skg_net()
+    tgt_net, swaps = shuffle_arr(generate_skg_arr())
+    tgt_net = nx.from_numpy_matrix(tgt_net)
     seeds = get_seeds(src_net, tgt_net, 100)
-    print len(src_net.edges()), len(tgt_net.edges())
     res = expando_pgm(src_net, tgt_net, seeds, 5)
-    print res
+    print "swaps: ", swaps
+    print "========="
+    print "========="
+    print "========="
+    print "========="
+    print "res: ", res
     print len(res)
     print len(set(res))
