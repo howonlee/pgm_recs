@@ -152,11 +152,20 @@ def shuffle_arr(arr, num_swaps=10000):
         new_arr = perform_swap(new_arr, swap)
     return arr, swaps
 
+def show_net(net):
+    arr = nx.to_numpy_matrix(net)
+    plt.imshow(arr)
+    plt.show()
+
+def pair_similarity(something)
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
     src_net = read_small_data()
     tgt_net = read_small_data(offset=4000)
+    show_net(src_net)
+    # now... does this actually mean anything?
     seeds = get_seeds(src_net, tgt_net, 100)
     res = expando_pgm(src_net, tgt_net, seeds, 5)
     print "========="
