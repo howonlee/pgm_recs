@@ -157,7 +157,13 @@ def show_net(net):
     plt.imshow(arr)
     plt.show()
 
-def pair_similarity(something)
+def l2_similarities(arr, fst, snd):
+    pass
+
+def pearson_similarities(arr, fst, snd):
+    pass
+
+################### something something something
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
