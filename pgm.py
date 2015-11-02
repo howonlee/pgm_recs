@@ -6,6 +6,7 @@ import random
 import collections
 import matplotlib.pyplot as plt
 import itertools
+import scipy.stats as sci_st
 import operator
 import cProfile
 import dtw
@@ -158,10 +159,16 @@ def show_net(net):
     plt.show()
 
 def l2_similarities(arr, fst, snd):
-    pass
-
-def pearson_similarities(arr, fst, snd):
-    pass
+    # vectorize later
+    fst_arr = np.ravel(arr[:, fst])
+    snd_arr = np.ravel(arr[:, snd])
+    return sci_st.pearsonr(fst_arr, snd_arr)
+#
+#def pearson_similarities(arr, fst, snd):
+#    fst_arr = arr[something]
+#    snd_arr = arr[something]
+#    return something again, I guess
+#    pass
 
 ################### something something something
 
@@ -169,12 +176,21 @@ if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
     src_net = read_small_data()
-    tgt_net = read_small_data(offset=4000)
-    show_net(src_net)
+    src_arr = nx.to_numpy_matrix(src_net)
+    """
+    Probably alpha == 0.05 is not good enough
+    Ah well
+    """
+    for x in xrange(src_arr.shape[0]):
+        res, res_sig = l2_similarities(src_arr, 2, x)
+        print res, res_sig
+        if res_sig < 0.05:
+            print "SIGNIFICANT"
+    #tgt_net = read_small_data(offset=4000)
     # now... does this actually mean anything?
-    seeds = get_seeds(src_net, tgt_net, 100)
-    res = expando_pgm(src_net, tgt_net, seeds, 5)
-    print "========="
-    print "res: ", res
-    print len(res)
-    print len(set(res))
+    #seeds = get_seeds(src_net, tgt_net, 100)
+    #res = expando_pgm(src_net, tgt_net, seeds, 5)
+    #print "========="
+    #print "res: ", res
+    #print len(res)
+    #print len(set(res))
