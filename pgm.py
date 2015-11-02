@@ -164,19 +164,26 @@ def similarities(arr, fst, snd):
     snd_arr = np.ravel(arr[:, snd])
     return sci_st.pearsonr(fst_arr, snd_arr)
 
+def euclidean_similarities(arr, fst, snd):
+    fst_arr = np.ravel(arr[:, fst])
+    snd_arr = np.ravel(arr[:, snd])
+    return np.sqrt(np.sum((fst_arr - snd_arr) ** 2))
+
 def filter_net(net):
     """
-    Naively, O(n^2)
-    prolly some optimization possible with caching pearson things to get it to O(n log n)
+    Get it to O(n log n) please
     """
     print "start filtering..."
     arr = nx.to_numpy_matrix(net)
     filtered_arr = np.zeros_like(arr)
+    thresh = np.sqrt(arr.shape[0]) - 5
+    print arr.shape
     for x in xrange(arr.shape[0]):
         if x % 10 == 0:
             print "on node: ", x
         for y in xrange(arr.shape[1]):
-            if similarities(arr, x, y)[1] < 0.0001:
+            #if similarities(arr, x, y)[1] < 0.0001:
+            if euclidean_similarities(arr, x, y) > thresh:
                 """
                 that is, if we pass pearson test
                 """
@@ -185,19 +192,21 @@ def filter_net(net):
     filtered_net = nx.from_numpy_matrix(filtered_arr)
     return filtered_net
 
+def similarity_mat(arr):
+    print arr.shape
+    sim_mat = np.zeros_like(arr)
+    for x in xrange(arr.shape[0]):
+        if x % 10 == 0:
+            print "on node: ", x
+        for y in xrange(arr.shape[1]):
+            sim_mat[x,y] = euclidean_similarities(arr, x, y)
+    return sim_mat
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
-    src_net = read_small_data()
-    filtered_src_net = filter_net(src_net)
-    filtered_arr = nx.to_numpy_matrix(filtered_src_net)
+    src_net = read_small_data(sample=10000)
+    filtered_net = filter_net(src_net)
+    filtered_arr = nx.to_numpy_matrix(filtered_net)
     plt.imshow(filtered_arr)
     plt.show()
-    #tgt_net = read_small_data(offset=4000)
-    # now... does this actually mean anything?
-    #seeds = get_seeds(src_net, tgt_net, 100)
-    #res = expando_pgm(src_net, tgt_net, seeds, 5)
-    #print "========="
-    #print "res: ", res
-    #print len(res)
-    #print len(set(res))
