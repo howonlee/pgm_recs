@@ -164,20 +164,35 @@ def similarities(arr, fst, snd):
     snd_arr = np.ravel(arr[:, snd])
     return sci_st.pearsonr(fst_arr, snd_arr)
 
+def filter_net(net):
+    """
+    Naively, O(n^2)
+    prolly some optimization possible with caching pearson things to get it to O(n log n)
+    """
+    print "start filtering..."
+    arr = nx.to_numpy_matrix(net)
+    filtered_arr = np.zeros_like(arr)
+    for x in xrange(arr.shape[0]):
+        if x % 10 == 0:
+            print "on node: ", x
+        for y in xrange(arr.shape[1]):
+            if similarities(arr, x, y)[1] < 0.0001:
+                """
+                that is, if we pass pearson test
+                """
+                filtered_arr[x, y] = 1
+    print "end filtering..."
+    filtered_net = nx.from_numpy_matrix(filtered_arr)
+    return filtered_net
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
     src_net = read_small_data()
-    src_arr = nx.to_numpy_matrix(src_net)
-    """
-    Probably alpha == 0.05 is not good enough
-    Ah well
-    """
-    for x in xrange(src_arr.shape[0]):
-        res, res_sig = l2_similarities(src_arr, 2, x)
-        print res, res_sig
-        if res_sig < 0.05:
-            print "SIGNIFICANT"
+    filtered_src_net = filter_net(src_net)
+    filtered_arr = nx.to_numpy_matrix(filtered_src_net)
+    plt.imshow(filtered_arr)
+    plt.show()
     #tgt_net = read_small_data(offset=4000)
     # now... does this actually mean anything?
     #seeds = get_seeds(src_net, tgt_net, 100)
