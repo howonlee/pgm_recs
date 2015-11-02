@@ -176,8 +176,8 @@ def filter_net(net):
     print "start filtering..."
     arr = nx.to_numpy_matrix(net)
     filtered_arr = np.zeros_like(arr)
-    thresh = np.sqrt(arr.shape[0]) - 5
-    print arr.shape
+    thresh = 2
+    print arr.shape, thresh
     for x in xrange(arr.shape[0]):
         if x % 10 == 0:
             print "on node: ", x
@@ -205,7 +205,7 @@ def similarity_mat(arr):
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     #net = generate_skg()
-    src_net = read_small_data(sample=10000)
+    src_net = read_small_data(sample=500)
     filtered_net = filter_net(src_net)
     filtered_arr = nx.to_numpy_matrix(filtered_net)
     plt.imshow(filtered_arr)
