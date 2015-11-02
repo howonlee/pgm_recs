@@ -158,19 +158,11 @@ def show_net(net):
     plt.imshow(arr)
     plt.show()
 
-def l2_similarities(arr, fst, snd):
+def similarities(arr, fst, snd):
     # vectorize later
     fst_arr = np.ravel(arr[:, fst])
     snd_arr = np.ravel(arr[:, snd])
     return sci_st.pearsonr(fst_arr, snd_arr)
-#
-#def pearson_similarities(arr, fst, snd):
-#    fst_arr = arr[something]
-#    snd_arr = arr[something]
-#    return something again, I guess
-#    pass
-
-################### something something something
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
