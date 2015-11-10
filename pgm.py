@@ -223,7 +223,6 @@ def generate_rtg(length=10000):
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    rtg_net_1 = generate_rtg()
-    rtg_net_2 = generate_rtg()
-    print len(rtg_net_1.nodes())
-    print len(rtg_net_2.nodes())
+    rtg_1 = generate_rtg()
+    rtg_2 = generate_rtg()
+    print normal_pgm(rtg_1, rtg_2, seeds, 3)
