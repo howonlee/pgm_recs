@@ -42,7 +42,7 @@ def l2_norm(x, y):
     #because I am too lazy to actually figure out how to do it with np norm
     return np.sqrt(x ** 2 + y ** 2)
 
-def get_seeds(src_net, tgt_net, num_seeds):
+def old_get_seeds(src_net, tgt_net, num_seeds):
     #we're going to need to skip some, friend
     src_degs = sorted(nx.degree(src_net).items(), key=operator.itemgetter(1), reverse=True)
     tgt_degs = sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)
@@ -51,6 +51,18 @@ def get_seeds(src_net, tgt_net, num_seeds):
     dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l2_norm)
     seeds = path_to_seeds(path)
     return seeds
+
+def calc_energy(src_net, tgt_net, biggest_matching):
+    """
+    Biggest_matching is the naive matching between the top x nodes in src_net and the top y nodes in src_net
+    We return a refined partial matching
+    """
+    pass
+
+def get_seeds(src_net, tgt_net, num_seeds):
+    # return them with labels intact
+    # numbnuts matching
+    pass
 
 def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
     """
