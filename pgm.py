@@ -8,7 +8,7 @@ import collections
 import matplotlib.pyplot as plt
 import itertools
 import scipy.stats as sci_st
-import operator
+import operator as op
 import cProfile
 import dtw
 
@@ -44,17 +44,17 @@ def l2_norm(x, y):
 
 def old_get_seeds(src_net, tgt_net, num_seeds):
     #we're going to need to skip some, friend
-    src_degs = sorted(nx.degree(src_net).items(), key=operator.itemgetter(1), reverse=True)
-    tgt_degs = sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)
-    src_dists = list(itertools.islice(map(operator.itemgetter(1), src_degs), num_seeds))
-    tgt_dists = list(itertools.islice(map(operator.itemgetter(1), tgt_degs), num_seeds))
+    src_degs = sorted(nx.degree(src_net).items(), key=op.itemgetter(1), reverse=True)
+    tgt_degs = sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1), reverse=True)
+    src_dists = list(itertools.islice(map(op.itemgetter(1), src_degs), num_seeds))
+    tgt_dists = list(itertools.islice(map(op.itemgetter(1), tgt_degs), num_seeds))
     dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l2_norm)
     seeds = path_to_seeds(path)
     return seeds
 
 def generate_biggest_matching(src_net, tgt_net, num_seeds):
-    src_degs = map(operator.itemgetter(0), sorted(nx.degree(src_net).items(), key=operator.itemgetter(1), reverse=True)[:num_seeds])
-    tgt_degs = map(operator.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)[:num_seeds])
+    src_degs = map(op.itemgetter(0), sorted(nx.degree(src_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
+    tgt_degs = map(op.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
     return zip(src_degs, tgt_degs)
 
 def generate_matching_neighbors(matching, num_neighbors=20):
@@ -64,17 +64,26 @@ def generate_matching_neighbors(matching, num_neighbors=20):
         return random.randint(0, len(it) - 1)
     for x in xrange(num_neighbors):
         curr_matching = matching[:]
-        src_degs = map(operator.itemgetter(0), matching)
-        tgt_degs = map(operator.itemgetter(1), matching)
+        src_words = map(op.itemgetter(0), matching)
+        tgt_words = map(op.itemgetter(1), matching)
         for y in xrange(5):
-            first, second = rand_idx(tgt_degs), rand_idx(tgt_degs)
+            first, second = rand_idx(tgt_words), rand_idx(tgt_words)
             while first == second:
-                first, second = rand_idx(tgt_degs), rand_idx(tgt_degs)
-            tgt_degs[first], tgt_degs[second] = tgt_degs[second], tgt_degs[first]
-        neighbors.append(zip(src_degs, tgt_degs))
+                first, second = rand_idx(tgt_words), rand_idx(tgt_words)
+            tgt_words[first], tgt_words[second] = tgt_words[second], tgt_words[first]
+        neighbors.append(zip(src_words, tgt_words))
     return neighbors
 
 def calc_energy(src_net, tgt_net, matching):
+    src_words, tgt_words = map(op.itemgetter(0), matching), map(op.itemgetter(1), matching)
+    src_degs, tgt_degs = something
+    cosines go here and shit
+    some pair distance something?
+    degree_something = something
+#############
+#############
+#############
+#############
 #############
 #############
 #############
