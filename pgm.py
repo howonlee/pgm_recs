@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+import numpy.random as npr
 import sys
 import math
 import random
@@ -202,11 +203,27 @@ def similarity_mat(arr):
             sim_mat[x,y] = euclidean_similarities(arr, x, y)
     return sim_mat
 
+def generate_rtg_words(length):
+    probs = np.array([0.2, 0.1, 0.1, 0.3, 0.3])
+    choices = map(int, list(npr.choice(5, length, p=probs)))
+    members = "abcd "
+    return "".join(members[choice] for choice in choices)
+
+def wash_words(letters):
+    words = letters.split()
+    net = nx.Graph()
+    for word1, word2 in zip(words, words[1:]):
+        net.add_edge(word1, word2)
+    return net
+
+# cap the length and try the extra thought
+def generate_rtg(length=10000):
+    rtg_words = generate_rtg_words(length)
+    return wash_words(rtg_words)
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    #net = generate_skg()
-    src_net = read_small_data(sample=500)
-    filtered_net = filter_net(src_net)
-    filtered_arr = nx.to_numpy_matrix(filtered_net)
-    plt.imshow(filtered_arr)
-    plt.show()
+    rtg_net_1 = generate_rtg()
+    rtg_net_2 = generate_rtg()
+    print len(rtg_net_1.nodes())
+    print len(rtg_net_2.nodes())
