@@ -57,26 +57,50 @@ def generate_biggest_matching(src_net, tgt_net, num_seeds):
     tgt_degs = map(operator.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)[:num_seeds])
     return zip(src_degs, tgt_degs)
 
-def search_annealing(src_net, tgt_net, biggest_matching, num_iters=10000):
+def generate_matching_neighbors(matching, num_neighbors=20):
+    # unzip, switch some orders, rezip
+    neighbors = []
+    def rand_idx(it):
+        return random.randint(0, len(it) - 1)
+    for x in xrange(num_neighbors):
+        curr_matching = matching[:]
+        src_degs = map(operator.itemgetter(0), matching)
+        tgt_degs = map(operator.itemgetter(1), matching)
+        for y in xrange(5):
+            first, second = rand_idx(tgt_degs), rand_idx(tgt_degs)
+            while first == second:
+                first, second = rand_idx(tgt_degs), rand_idx(tgt_degs)
+            tgt_degs[first], tgt_degs[second] = tgt_degs[second], tgt_degs[first]
+        neighbors.append(zip(src_degs, tgt_degs))
+    return neighbors
+
+def calc_energy(src_net, tgt_net, matching):
+#############
+#############
+#############
+    pass
+
+def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters=10000):
     """
     Biggest_matching is the naive matching between the top x nodes in src_net and the top y nodes in src_net
     We return a refined partial matching
     """
-    curr_matching = biggest_matching[:]
-    curr_energy = float("inf")
-    energy = float("inf")
-    for x in xrange(num_iters):
-        if x % 1000 == 0:
-            print "annealing initial matching: ", x
-        for neighbor in generate some neighbors:
-            # calculate energy here
-##########################
-##########################
-##########################
-##########################
-            if energy < curr_energy:
-                curr_matching = that neighbor matching
-                curr_energy = energy
+    all_matchings = []
+    for x in xrange(num_tries):
+        curr_matching = biggest_matching[:]
+        curr_energy = calc_energy(src_net, tgt_net, curr_matching)
+        energy = float("inf")
+        for y in xrange(num_iters):
+            if y % 1000 == 0:
+                print "try: ", x
+                print "annealing initial matching: ", y, " / ", str(num_iters)
+            for neighbor in generate_matching_neighbors(curr_matching)
+                energy = calc_energy(src_net, tgt_net, neighbor)
+                if energy < curr_energy:
+                    curr_matching = neighbor
+                    curr_energy = energy
+        all_matchings.append((curr_energy, curr_matching))
+    best_matching = min(all_matchings, key=operator.itemgetter(0))[1]
     return curr_matching
 
 def get_seeds(src_net, tgt_net, num_seeds):
