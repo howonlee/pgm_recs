@@ -52,17 +52,36 @@ def old_get_seeds(src_net, tgt_net, num_seeds):
     seeds = path_to_seeds(path)
     return seeds
 
-def calc_energy(src_net, tgt_net, biggest_matching):
+def generate_biggest_matching(src_net, tgt_net, num_seeds):
+    src_degs = map(operator.itemgetter(0), sorted(nx.degree(src_net).items(), key=operator.itemgetter(1), reverse=True)[:num_seeds])
+    tgt_degs = map(operator.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=operator.itemgetter(1), reverse=True)[:num_seeds])
+    return zip(src_degs, tgt_degs)
+
+def search_annealing(src_net, tgt_net, biggest_matching, num_iters=10000):
     """
     Biggest_matching is the naive matching between the top x nodes in src_net and the top y nodes in src_net
     We return a refined partial matching
     """
-    pass
+    curr_matching = biggest_matching[:]
+    curr_energy = float("inf")
+    energy = float("inf")
+    for x in xrange(num_iters):
+        if x % 1000 == 0:
+            print "annealing initial matching: ", x
+        for neighbor in generate some neighbors:
+            # calculate energy here
+##########################
+##########################
+##########################
+##########################
+            if energy < curr_energy:
+                curr_matching = that neighbor matching
+                curr_energy = energy
+    return curr_matching
 
 def get_seeds(src_net, tgt_net, num_seeds):
-    # return them with labels intact
-    # numbnuts matching
-    pass
+    matching = generate_biggest_matching(src_net, tgt_net, num_seeds)
+    return search_annealing(src_net, tgt_net, matching)
 
 def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
     """
