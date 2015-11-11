@@ -77,7 +77,7 @@ def generate_matching_neighbors(matching, num_neighbors=20):
 def calc_energy(src_net, tgt_net, matching):
     src_words, tgt_words = map(op.itemgetter(0), matching), map(op.itemgetter(1), matching)
     src_degs, tgt_degs = something
-    cosines go here and shit
+    cosines go here and shit, i dont understand this at all
     some pair distance something?
     degree_something = something
 #############
