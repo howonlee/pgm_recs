@@ -9,21 +9,35 @@ def wash_words(words):
     return net
 
 def cos_dist(fst, snd):
-    pass
+    intersection = len(set(fst).intersection(set(snd)))
+    return intersection / np.sqrt(len(fst) * len(snd))
 
 def cos_hist(net):
     neighborhoods = {}
-    fill up the neighborhoods
+    for node in net.nodes():
+        neighborhoods[node] = net.neighbors(node)
     cosine_vals = []
-    for node in net:
-        for other node in net:
-            cosine_vals.append(cos_dist(node, other node))
+    for node1 in net.nodes():
+        for node2 in net.nodes():
+            cosine_vals.append(cos_dist(neighborhoods[node1], neighborhoods[node2]))
     return cosine_vals
 
+def cos_mat(net):
+    neighborhoods = {}
+    for node in net.nodes():
+        neighborhoods[node] = net.neighbors(node)
+    mat = np.zeros((len(net.nodes()), len(net.nodes())))
+    for idx1, node1 in enumerate(net.nodes()):
+        for idx2, node2 in enumerate(net.nodes()):
+            mat[idx1, idx2] = cos_dist(neighborhoods[node1], neighborhoods[node2])
+    return mat
+
+
 if __name__ == "__main__":
-    with open("corpus.txt") as corpus_file:
-        words = corpus_file.read().split()[:5000]
+    with open("data/corpus.txt") as corpus_file:
+        words = corpus_file.read().split()[:500]
     word_net = wash_words(words)
-    cos_vals = create_cos_mat(word_net)
-    plt.plot(cos_vals)
+    mat = cos_mat(word_net)
+    plt.imshow(mat)
+    plt.colorbar()
     plt.show()
