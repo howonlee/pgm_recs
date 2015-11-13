@@ -74,7 +74,7 @@ def generate_matching_neighbors(matching, num_neighbors=20):
         neighbors.append(zip(src_words, tgt_words))
     return neighbors
 
-def calc_energy(src_net, tgt_net, matching):
+def calc_energy(src_net, tgt_net, matching, switch_i, switch_j):
     src_words, tgt_words = map(op.itemgetter(0), matching), map(op.itemgetter(1), matching)
     src_degs, tgt_degs = something
     cosines go here and shit, i dont understand this at all
