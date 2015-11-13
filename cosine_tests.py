@@ -8,8 +8,17 @@ def wash_words(words):
         net.add_edge(fst, snd)
     return net
 
-def cos_hist(net):
+def cos_dist(fst, snd):
     pass
+
+def cos_hist(net):
+    neighborhoods = {}
+    fill up the neighborhoods
+    cosine_vals = []
+    for node in net:
+        for other node in net:
+            cosine_vals.append(cos_dist(node, other node))
+    return cosine_vals
 
 if __name__ == "__main__":
     with open("corpus.txt") as corpus_file:
