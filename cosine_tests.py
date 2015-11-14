@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.random as npr
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -9,6 +10,10 @@ def wash_words(words):
     return net
 
 def cos_dist(fst, snd):
+    """
+    Try to get a fast intersection? by sorting or other method?
+    Cache it? Precompute them as sets, because that's actually nontrivial work, anyhow. "node_sets"
+    """
     intersection = len(set(fst).intersection(set(snd)))
     return intersection / np.sqrt(len(fst) * len(snd))
 
@@ -32,10 +37,16 @@ def cos_mat(net):
             mat[idx1, idx2] = cos_dist(neighborhoods[node1], neighborhoods[node2])
     return mat
 
+def generate_rtg_words(length):
+    probs = np.array([0.05, 0.05, 0.1, 0.05, 0.1, 0.2, 0.05, 0.05, 0.05, 0.3])
+    choices = map(int, list(npr.choice(10, length, p=probs)))
+    members = "abcdefghi "
+    return "".join(members[choice] for choice in choices)
 
 if __name__ == "__main__":
-    with open("data/corpus.txt") as corpus_file:
-        words = corpus_file.read().split()[:500]
+    #with open("data/corpus.txt") as corpus_file:
+    #    words = corpus_file.read().split()[:4000]
+    words = generate_rtg_words(10000).split()
     word_net = wash_words(words)
     mat = cos_mat(word_net)
     plt.imshow(mat)

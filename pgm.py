@@ -13,6 +13,10 @@ import cProfile
 import dtw
 
 def select_net(net, p=0.9):
+    """
+    Take a network and sample a portion of it,
+    where p = the amount that you're sampling
+    """
     new_net = nx.Graph()
     edge_list = net.edges()
     new_net_edges = []
@@ -22,35 +26,9 @@ def select_net(net, p=0.9):
     new_net.add_edges_from(new_net_edges)
     return new_net
 
-def path_to_seeds(path):
-    lset = set() #left and right paths, we think of them as
-    rset = set()
-    lpath, rpath = map(list, path)
-    seeds = []
-    for idx, x in enumerate(lpath):
-        y = rpath[idx]
-        if x in lset:
-            continue
-        if y in rset:
-            continue
-        seeds.append((x, y))
-        lset.add(x)
-        rset.add(y)
-    return seeds
-
 def l2_norm(x, y):
     #because I am too lazy to actually figure out how to do it with np norm
     return np.sqrt(x ** 2 + y ** 2)
-
-def old_get_seeds(src_net, tgt_net, num_seeds):
-    #we're going to need to skip some, friend
-    src_degs = sorted(nx.degree(src_net).items(), key=op.itemgetter(1), reverse=True)
-    tgt_degs = sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1), reverse=True)
-    src_dists = list(itertools.islice(map(op.itemgetter(1), src_degs), num_seeds))
-    tgt_dists = list(itertools.islice(map(op.itemgetter(1), tgt_degs), num_seeds))
-    dist, cost, path = dtw.dtw(src_dists, tgt_dists, dist=l2_norm)
-    seeds = path_to_seeds(path)
-    return seeds
 
 def generate_biggest_matching(src_net, tgt_net, num_seeds):
     src_degs = map(op.itemgetter(0), sorted(nx.degree(src_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
@@ -74,19 +52,10 @@ def generate_matching_neighbors(matching, num_neighbors=20):
         neighbors.append(zip(src_words, tgt_words))
     return neighbors
 
-def calc_energy(src_net, tgt_net, matching, switch_i, switch_j):
-    src_words, tgt_words = map(op.itemgetter(0), matching), map(op.itemgetter(1), matching)
-    src_degs, tgt_degs = something
-    cosines go here and shit, i dont understand this at all
-    some pair distance something?
-    degree_something = something
-#############
-#############
-#############
-#############
-#############
-#############
-#############
+def calc_energy(src_net, tgt_net, matching, switch_fst, switch_snd):
+    """
+    Total differences between cosines given something?
+    """
     pass
 
 def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters=10000):
@@ -112,7 +81,7 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters
     best_matching = min(all_matchings, key=operator.itemgetter(0))[1]
     return curr_matching
 
-def get_seeds(src_net, tgt_net, num_seeds):
+def generate_seeds(src_net, tgt_net, num_seeds):
     matching = generate_biggest_matching(src_net, tgt_net, num_seeds)
     return search_annealing(src_net, tgt_net, matching)
 
@@ -138,6 +107,13 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
                 imp_h.add(neighbor[1])
         used.append(curr_pair)
     return used
+
+def expand_once_pgm(net1, net2, seeds, r):
+    ################
+    ################
+    ################
+    ################
+    pass
 
 def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
     marks = collections.defaultdict(int)
@@ -289,4 +265,4 @@ if __name__ == "__main__":
     random.seed(123456) #different seed :)
     rtg_1 = generate_rtg()
     rtg_2 = generate_rtg()
-    print normal_pgm(rtg_1, rtg_2, seeds, 3)
+    print generate_seeds(rtg_1, rtg_2)
