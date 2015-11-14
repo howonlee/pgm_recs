@@ -52,32 +52,55 @@ def generate_matching_neighbors(matching, num_neighbors=20):
         neighbors.append(zip(src_words, tgt_words))
     return neighbors
 
-def calc_energy(src_net, tgt_net, matching, switch_fst, switch_snd):
-    """
-    Total differences between cosines given something?
-    """
-    pass
+def cosine_mat(net):
+    neighborhoods = {}
+    for node in net.nodes():
+        neighborhoods[node] = net.neighbors(node)
+    mat = np.zeros((len(net.nodes()), len(net.nodes())))
+    for idx1, node1 in enumerate(net.nodes()):
+        for idx2, node2 in enumerate(net.nodes()):
+            mat[idx1, idx2] = cos_dist(neighborhoods[node1], neighborhoods[node2])
+    return mat
+
+def energy_diff_wrapper(src_net, tgt_net):
+    src_sigmas = cosine_mat(src_net)
+    tgt_sigmas = cosine_mat(tgt_net)
+    src_sigma_means = src_sigmas.mean(axis=1)
+    tgt_sigma_means = tgt_sigmas.mean(axis=1)
+    alpha = 0.5
+    beta = 0.5
+    def pair_dist(x, y):
+        r = float(x) / y if x > y else float(y) / x
+        return (r - 1) ** alpha
+    def energy(i, j):
+        scaling_factor = (src_sigma_means[i] * tgt_sigma_means[i]) ** (beta / 2)
+        weight = pair_dist(src_sigmas[i,j] / src_sigma_means[i], tgt_sigmas[i,j] / tgt_sigma_means[i])
+        return scaling_factor * weight
+    def total_energy():
+###################
+###################
+###################
+        pass
+    return energy, total_energy
 
 def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters=10000):
     """
-    Biggest_matching is the naive matching between the top x nodes in src_net and the top y nodes in src_net
-    We return a refined partial matching
+    Currently just gradient descent
     """
     all_matchings = []
     for x in xrange(num_tries):
+        calc_energy, calc_total_energy() = energy_diff_wrapper(src_net, tgt_net)
         curr_matching = biggest_matching[:]
-        curr_energy = calc_energy(src_net, tgt_net, curr_matching)
-        energy = float("inf")
         for y in xrange(num_iters):
             if y % 1000 == 0:
                 print "try: ", x
                 print "annealing initial matching: ", y, " / ", str(num_iters)
-            for neighbor in generate_matching_neighbors(curr_matching)
-                energy = calc_energy(src_net, tgt_net, neighbor)
-                if energy < curr_energy:
-                    curr_matching = neighbor
-                    curr_energy = energy
-        all_matchings.append((curr_energy, curr_matching))
+            i, j, k = generate_possible_swap(curr_matching)
+            energy = calc_energy(i, j)
+            energy_2 = calc_energy(i, k)
+            if energy_2 - energy > 0: # apply annealing here when we do it
+                curr_matching = apply_swap(curr_matching, swap)
+        all_matchings.append((calc_total_energy(), curr_matching))
     best_matching = min(all_matchings, key=operator.itemgetter(0))[1]
     return curr_matching
 
@@ -116,6 +139,11 @@ def expand_once_pgm(net1, net2, seeds, r):
     pass
 
 def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
+####################3
+####################3
+####################3
+####################3
+####################3
     marks = collections.defaultdict(int)
     imp_t, imp_h = set(), set()
     unused, matched, candidates = seeds[:], [], []
