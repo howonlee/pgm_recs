@@ -35,6 +35,12 @@ def generate_biggest_matching(src_net, tgt_net, num_seeds):
     tgt_degs = map(op.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
     return zip(src_degs, tgt_degs)
 
+def generate_possible_swap(matching):
+############ss
+############ss
+############ss
+    pass
+
 def generate_matching_neighbors(matching, num_neighbors=20):
     # unzip, switch some orders, rezip
     neighbors = []
@@ -51,6 +57,10 @@ def generate_matching_neighbors(matching, num_neighbors=20):
             tgt_words[first], tgt_words[second] = tgt_words[second], tgt_words[first]
         neighbors.append(zip(src_words, tgt_words))
     return neighbors
+
+def cos_dist(fst, snd):
+    intersection = len(set(fst).intersection(set(snd)))
+    return intersection / np.sqrt(len(fst) * len(snd))
 
 def cosine_mat(net):
     neighborhoods = {}
@@ -89,7 +99,7 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters
     """
     all_matchings = []
     for x in xrange(num_tries):
-        calc_energy, calc_total_energy() = energy_diff_wrapper(src_net, tgt_net)
+        calc_energy, calc_total_energy = energy_diff_wrapper(src_net, tgt_net)
         curr_matching = biggest_matching[:]
         for y in xrange(num_iters):
             if y % 1000 == 0:
@@ -104,7 +114,7 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters
     best_matching = min(all_matchings, key=operator.itemgetter(0))[1]
     return curr_matching
 
-def generate_seeds(src_net, tgt_net, num_seeds):
+def generate_seeds(src_net, tgt_net, num_seeds=50):
     matching = generate_biggest_matching(src_net, tgt_net, num_seeds)
     return search_annealing(src_net, tgt_net, matching)
 
