@@ -36,9 +36,14 @@ def generate_biggest_matching(src_net, tgt_net, num_seeds):
     return zip(src_degs, tgt_degs)
 
 def generate_possible_swap(matching):
-############ss
-############ss
-############ss
+    to_swap = random.choice(matching)
+    pass
+
+def apply_swap(curr_matching, swap):
+    return new_matching
+######################33
+######################33
+######################33
     pass
 
 def generate_matching_neighbors(matching, num_neighbors=20):
@@ -87,10 +92,15 @@ def energy_diff_wrapper(src_net, tgt_net):
         weight = pair_dist(src_sigmas[i,j] / src_sigma_means[i], tgt_sigmas[i,j] / tgt_sigma_means[i])
         return scaling_factor * weight
     def total_energy():
-###################
-###################
-###################
-        pass
+        """
+        There is a less idiotic way to do it
+        I don't care
+        """
+        total = 0
+        for x in xrange(src_sigmas.shape[0]):
+            for y in xrange(src_sigmas.shape[1]):
+                total += energy(x,y)
+        return total
     return energy, total_energy
 
 def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters=10000):
