@@ -87,26 +87,31 @@ def cosine_mat(net):
 def energy_diff_wrapper(src_net, tgt_net):
     src_sigmas = np.nan_to_num(cosine_mat(src_net))
     tgt_sigmas = np.nan_to_num(cosine_mat(tgt_net))
+    # naive smoothing
     src_sigma_means = src_sigmas.mean(axis=1)
     tgt_sigma_means = tgt_sigmas.mean(axis=1)
     alpha = 0.5
     beta = 0.5
     def pair_dist(x, y):
+        # this does not work right
         r = float(x) / y if x > y else float(y) / x
-        return (r - 1.0) ** alpha
+        if r != r:
+            return 0
+        if r > 10000: # doesn't matter
+            return 0
+        return np.sqrt(r - 1.0)
     def energy(i, j):
         scaling_factor = (src_sigma_means[i] * tgt_sigma_means[i]) ** (beta / 2)
         weight = pair_dist(src_sigmas[i,j] / src_sigma_means[i], tgt_sigmas[i,j] / tgt_sigma_means[i])
         return scaling_factor * weight
-    def total_energy():
+    def total_energy(matching):
         """
         There is a less idiotic way to do it
         I don't care
         """
         total = 0
-        for x in xrange(src_sigmas.shape[0]):
-            for y in xrange(src_sigmas.shape[1]):
-                total += energy(x,y)
+        for x, y in matching:
+            total += energy(x, y)
         return total
     return energy, total_energy
 
@@ -130,7 +135,7 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=5, num_iters=
             energy_2 = calc_energy(i_tup[0], j_tup[1]) + calc_energy(j_tup[0], i_tup[1])
             if energy_2 - energy > 0: # apply annealing here when we do it
                 curr_matching = apply_swap(curr_matching, swap)
-        all_matchings.append((calc_total_energy(), curr_matching))
+        all_matchings.append((calc_total_energy(curr_matching), curr_matching))
     best_matching = min(all_matchings, key=op.itemgetter(0))[1]
     print all_matchings
     return best_matching
