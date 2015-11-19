@@ -30,6 +30,7 @@ class TestPGM():
         # test pair_dist
         # test energy
         # test total_energy
+        pass
 
     def test_search_annealing(self, src_net, tgt_net, biggest_matching, num_tries=5, num_iters=10000):
         pass
