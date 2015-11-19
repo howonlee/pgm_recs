@@ -85,15 +85,15 @@ def cosine_mat(net):
     return mat
 
 def energy_diff_wrapper(src_net, tgt_net):
-    src_sigmas = cosine_mat(src_net)
-    tgt_sigmas = cosine_mat(tgt_net)
+    src_sigmas = np.nan_to_num(cosine_mat(src_net))
+    tgt_sigmas = np.nan_to_num(cosine_mat(tgt_net))
     src_sigma_means = src_sigmas.mean(axis=1)
     tgt_sigma_means = tgt_sigmas.mean(axis=1)
     alpha = 0.5
     beta = 0.5
     def pair_dist(x, y):
         r = float(x) / y if x > y else float(y) / x
-        return (r - 1) ** alpha
+        return (r - 1.0) ** alpha
     def energy(i, j):
         scaling_factor = (src_sigma_means[i] * tgt_sigma_means[i]) ** (beta / 2)
         weight = pair_dist(src_sigmas[i,j] / src_sigma_means[i], tgt_sigmas[i,j] / tgt_sigma_means[i])
@@ -126,8 +126,6 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=5, num_iters=
                 print "annealing initial matching: ", y, " / ", str(num_iters)
             swap = generate_possible_swap(curr_matching)
             i, j, i_tup, j_tup = swap
-            if i_tup[1] > len_tgt or j_tup[1] > len_tgt:
-                continue
             energy = calc_energy(*i_tup) + calc_energy(*j_tup)
             energy_2 = calc_energy(i_tup[0], j_tup[1]) + calc_energy(j_tup[0], i_tup[1])
             if energy_2 - energy > 0: # apply annealing here when we do it
@@ -268,9 +266,21 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words)
 
+def add_dummies(net1, net2):
+    dummified_net1, dummified_net2 = net1.copy(), net2.copy()
+    net1_len, net2_len = len(net1.nodes()), len(net2.nodes())
+    if net1_len > net2_len:
+        for x in xrange(net2_len + 1, net1_len + 1):
+            dummified_net2.add_node(x)
+    elif net2_len > net1_len:
+        for x in xrange(net1_len + 1, net2_len + 1):
+            dummified_net1.add_node(x)
+    return dummified_net1, dummified_net2
+
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     rtg_1 = generate_rtg()
     rtg_2 = generate_rtg()
+    rtg_1, rtg_2 = add_dummies(rtg_1, rtg_2)
     print generate_seeds(rtg_1, rtg_2)
     print "now go do expando_pgm properly"
