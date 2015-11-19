@@ -133,8 +133,9 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=5, num_iters=
             if energy_2 - energy > 0: # apply annealing here when we do it
                 curr_matching = apply_swap(curr_matching, swap)
         all_matchings.append((calc_total_energy(), curr_matching))
-    best_matching = min(all_matchings, key=operator.itemgetter(0))[1]
-    return curr_matching
+    best_matching = min(all_matchings, key=op.itemgetter(0))[1]
+    print all_matchings
+    return best_matching
 
 def generate_seeds(src_net, tgt_net, num_seeds=50):
     matching = generate_biggest_matching(src_net, tgt_net, num_seeds)
