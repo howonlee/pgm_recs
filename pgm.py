@@ -36,15 +36,22 @@ def generate_biggest_matching(src_net, tgt_net, num_seeds):
     return zip(src_degs, tgt_degs)
 
 def generate_possible_swap(matching):
-    to_swap = random.choice(matching)
-    pass
+    to_swap1, to_swap2 =\
+        random.randint(0, len(matching)-1),\
+        random.randint(0, len(matching)-1)
+    while to_swap1 == to_swap2:
+        to_swap1, to_swap2 =\
+            random.randint(0, len(matching)-1),\
+            random.randint(0, len(matching)-1)
+    return to_swap1, to_swap2,\
+        matching[to_swap1], matching[to_swap2]
 
 def apply_swap(curr_matching, swap):
+    i, j, i_match, j_match = swap
+    new_matching = curr_matching[:]
+    new_matching[i] = (i_match[0], j_match[1])
+    new_matching[j] = (j_match[0], i_match[1])
     return new_matching
-######################33
-######################33
-######################33
-    pass
 
 def generate_matching_neighbors(matching, num_neighbors=20):
     # unzip, switch some orders, rezip
@@ -103,11 +110,13 @@ def energy_diff_wrapper(src_net, tgt_net):
         return total
     return energy, total_energy
 
-def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters=10000):
+def search_annealing(src_net, tgt_net, biggest_matching, num_tries=5, num_iters=10000):
     """
     Currently just gradient descent
     """
     all_matchings = []
+    len_src = len(src_net.nodes())
+    len_tgt = len(tgt_net.nodes())
     for x in xrange(num_tries):
         calc_energy, calc_total_energy = energy_diff_wrapper(src_net, tgt_net)
         curr_matching = biggest_matching[:]
@@ -115,9 +124,12 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=30, num_iters
             if y % 1000 == 0:
                 print "try: ", x
                 print "annealing initial matching: ", y, " / ", str(num_iters)
-            i, j, k = generate_possible_swap(curr_matching)
-            energy = calc_energy(i, j)
-            energy_2 = calc_energy(i, k)
+            swap = generate_possible_swap(curr_matching)
+            i, j, i_tup, j_tup = swap
+            if i_tup[1] > len_tgt or j_tup[1] > len_tgt:
+                continue
+            energy = calc_energy(*i_tup) + calc_energy(*j_tup)
+            energy_2 = calc_energy(i_tup[0], j_tup[1]) + calc_energy(j_tup[0], i_tup[1])
             if energy_2 - energy > 0: # apply annealing here when we do it
                 curr_matching = apply_swap(curr_matching, swap)
         all_matchings.append((calc_total_energy(), curr_matching))
@@ -292,20 +304,31 @@ def similarity_mat(arr):
     return sim_mat
 
 def generate_rtg_words(length):
+    """
+    Generates the words for the RTG
+    """
     probs = np.array([0.2, 0.1, 0.1, 0.3, 0.3])
     choices = map(int, list(npr.choice(5, length, p=probs)))
     members = "abcd "
     return "".join(members[choice] for choice in choices)
 
 def wash_words(letters):
+    """
+    Takes a sequence that can be split and turns it into a bigram network
+    """
     words = letters.split()
+    word_map = dict([(tup[1], tup[0]) for tup in enumerate(set(words))])
     net = nx.Graph()
     for word1, word2 in zip(words, words[1:]):
-        net.add_edge(word1, word2)
+        net.add_edge(word_map[word1], word_map[word2])
     return net
 
 # cap the length and try the extra thought
 def generate_rtg(length=10000):
+    """
+    Generate a Random Typer Graph a la Akoglu et al
+    Really rudimentary, I forget which of the various RTG versions this is
+    """
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words)
 
@@ -314,3 +337,4 @@ if __name__ == "__main__":
     rtg_1 = generate_rtg()
     rtg_2 = generate_rtg()
     print generate_seeds(rtg_1, rtg_2)
+    print "now go do expando_pgm properly"
