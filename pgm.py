@@ -137,7 +137,6 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=5, num_iters=
                 curr_matching = apply_swap(curr_matching, swap)
         all_matchings.append((calc_total_energy(curr_matching), curr_matching))
     best_matching = min(all_matchings, key=op.itemgetter(0))[1]
-    print all_matchings
     return best_matching
 
 def generate_seeds(src_net, tgt_net, num_seeds=50):
@@ -287,5 +286,5 @@ if __name__ == "__main__":
     rtg_1 = generate_rtg()
     rtg_2 = generate_rtg()
     rtg_1, rtg_2 = add_dummies(rtg_1, rtg_2)
-    print generate_seeds(rtg_1, rtg_2)
+    seeds = generate_seeds(rtg_1, rtg_2)
     print "now go do expando_pgm properly"
