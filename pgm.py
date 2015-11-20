@@ -166,29 +166,26 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
         used.append(curr_pair)
     return used
 
-def expand_once_pgm(net1, net2, seeds, r):
-    ################
-    ################
-    ################
-    ################
-    pass
-
 def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
     matched = seeds[:]
-    unused = seeds[:]
-    used = []
-    marks = []
+    marks = collections.defaultdict(int)
+    unused, used = seeds[:], set()
+    random.shuffle(unused)
     while unused:
+        t = 0
         for pair in unused:
-            add it to used
-            add one mark to neighboring pairs
-        while unmatched pair in marks with score >= 2:
-            select unmatched pair with minimum distance
-            matched.add(unmated pair)
-            if unmatched not in z:
-                add mark to neighboring pairs
-                add unmatched to used
-        unused = all appropriate neighboring pairs
+            used.add(pair)
+            for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
+                marks[neighbor] += 1
+###########################################
+        while there exists unmatched pair with score at least 2:
+            extremal_pair = select_extremal_pair
+            matched.append(extremal_pair)
+            if extremal_pair not in used:
+                for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
+                    marks[neighbor] += 1
+                used.add(extremal_pair)
+        unused = all neighboring pairs of matched such that pair not in used, fst not in v_1(m) and snd not in v_2(m)
     return matched
 
 def generate_skg_arr(order=11):
