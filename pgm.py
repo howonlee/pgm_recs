@@ -174,28 +174,21 @@ def expand_once_pgm(net1, net2, seeds, r):
     pass
 
 def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
-####################3
-####################3
-####################3
-####################3
-####################3
-    marks = collections.defaultdict(int)
-    imp_t, imp_h = set(), set()
-    unused, matched, candidates = seeds[:], [], []
-    random.shuffle(unused) # mutates!
+    matched = seeds[:]
+    unused = seeds[:]
+    used = []
+    marks = []
     while unused:
-        t2 = 0
-        curr_pair = unused.pop()
-        for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
-            if neighbor[0] in imp_t or neighbor[1] in imp_h:
-                continue
-            marks[neighbor] += 1
-            t2 += 1
-            if marks[neighbor] > r:
-                unused.append(neighbor)
-                imp_t.add(neighbor[0])
-                imp_h.add(neighbor[1])
-        matched.append(curr_pair)
+        for pair in unused:
+            add it to used
+            add one mark to neighboring pairs
+        while unmatched pair in marks with score >= 2:
+            select unmatched pair with minimum distance
+            matched.add(unmated pair)
+            if unmatched not in z:
+                add mark to neighboring pairs
+                add unmatched to used
+        unused = all appropriate neighboring pairs
     return matched
 
 def generate_skg_arr(order=11):
