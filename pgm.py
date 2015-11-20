@@ -166,26 +166,36 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
         used.append(curr_pair)
     return used
 
-def expando_pgm(net1, net2, seeds, r): #seeds is a list of tups
-    matched = seeds[:]
-    marks = collections.defaultdict(int)
-    unused, used = seeds[:], set()
-    random.shuffle(unused)
+def expando_pgm(net1, net2, seeds): #seeds is a list of tups
+    unused = set(seeds[:])
+    matched = set(seeds[:])
+    matched_node1s = set(map(op.itemgetter(0), seeds))
+    matched_node2s = set(map(op.itemgetter(1), seeds))
+    used = set()
+    marks = collections.Counter()
     while unused:
-        t = 0
-        for pair in unused:
-            used.add(pair)
-            for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
+        for curr_pair in unused:
+            used.add(curr_pair)
+            for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
                 marks[neighbor] += 1
-###########################################
-        while there exists unmatched pair with score at least 2:
-            extremal_pair = select_extremal_pair
-            matched.append(extremal_pair)
+        while marks.something >= 2: #################
+            extremal_pair = something ###################
+            matched.add(extremal_pair)
+            matched_node1s.add(extremal_pair[0])
+            matched_node2s.add(extremal_pair[1])
             if extremal_pair not in used:
-                for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
+                for neighbor in itertools.product(net1.neighbors(extremal_pair[0]), net2.neighbors(extremal_pair[1])):
                     marks[neighbor] += 1
                 used.add(extremal_pair)
-        unused = all neighboring pairs of matched such that pair not in used, fst not in v_1(m) and snd not in v_2(m)
+        unused = set()
+        for neighboring_pair in neighboring_pairs of the mached: ############3
+            if neighboring_pair in used:
+                continue
+            if neighboring_pair[0] in matched_node1s:
+                continue
+            if neighboring_pair[1] in matched_node2s:
+                continue
+            unused.add(neighboring_pair)
     return matched
 
 def generate_skg_arr(order=11):
