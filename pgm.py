@@ -19,6 +19,9 @@ def select_net(net, p=0.9):
     where p = the amount that you're sampling
     """
     new_net = nx.Graph()
+    # every node is added, but not every edge
+    for node in net.nodes():
+        new_net.add_node(node)
     edge_list = net.edges()
     new_net_edges = []
     for edge in edge_list:
@@ -73,7 +76,7 @@ def generate_matching_neighbors(matching, num_neighbors=20):
 
 def cos_dist(fst, snd):
     intersection = len(set(fst).intersection(set(snd)))
-    return intersection / np.sqrt(len(fst) * len(snd))
+    return float(intersection) / np.sqrt(len(fst) * len(snd))
 
 def cosine_mat(net):
     neighborhoods = {}
