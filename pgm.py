@@ -11,6 +11,7 @@ import scipy.stats as sci_st
 import operator as op
 import cProfile
 import dtw
+from blist import sorteddict
 
 def select_net(net, p=0.9):
     """
@@ -115,7 +116,7 @@ def energy_diff_wrapper(src_net, tgt_net):
         return total
     return energy, total_energy
 
-def search_annealing(src_net, tgt_net, biggest_matching, num_tries=5, num_iters=10000):
+def search_annealing(src_net, tgt_net, biggest_matching, num_tries=2, num_iters=10000):
     """
     Currently just gradient descent
     """
@@ -166,36 +167,67 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
         used.append(curr_pair)
     return used
 
+def net_degree_dist(net1, net2, pair):
+    return abs(net1.degree(pair[0]) - net2.degree(pair[1]))
+
 def expando_pgm(net1, net2, seeds): #seeds is a list of tups
     unused = set(seeds[:])
     matched = set(seeds[:])
     matched_node1s = set(map(op.itemgetter(0), seeds))
     matched_node2s = set(map(op.itemgetter(1), seeds))
     used = set()
-    marks = collections.Counter()
+    # The key is _BOTH_ the neighbor and the count of the neighbor
+    marks_keys = collections.Counter()
+    marks_sorted = sorteddict(key=lambda x: marks_keys[x])
+    def incr_mark(neighbor_tup):
+        marks_keys[neighbor_tup] += 1
+        if neighbor_tup in marks_sorted:
+            marks_sorted[neighbor_tup] += 1
+        else:
+            marks_sorted[neighbor_tup] = 1
+    # now, is this currying or is this partial function application?
+    # who the fuck knows
+    net_curried = lambda x: net_degree_dist(net1, net2, x)
     while unused:
+        print "begin init unused neighbor marking"
+        t1 = 0
         for curr_pair in unused:
+            t1 += 1
+            print "t1: ", t1
             used.add(curr_pair)
-            for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
-                marks[neighbor] += 1
-        while marks.something >= 2: #################
-            extremal_pair = something ###################
+            for neighbor_tup in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
+                incr_mark(neighbor_tup)
+        print "begin extremal pair counting"
+        t2 = 0
+        # do the heapqueue stuff without the marks
+        while marks_sorted.keys()[0] >= 2:
+            t2 += 1
+            if t2 % 30000 == 0:
+                print "t2: ", t2
+                print matched
+            most_common_pairs = marks_sorted.keys()[:30]
+            extremal_pair = sorted(list(most_common_pairs)[1:], key=net_curried)[0]
             matched.add(extremal_pair)
             matched_node1s.add(extremal_pair[0])
             matched_node2s.add(extremal_pair[1])
             if extremal_pair not in used:
-                for neighbor in itertools.product(net1.neighbors(extremal_pair[0]), net2.neighbors(extremal_pair[1])):
-                    marks[neighbor] += 1
+                for neighbor_tup in itertools.product(net1.neighbors(extremal_pair[0]), net2.neighbors(extremal_pair[1])):
+                    incr_mark(neighbor_tup)
                 used.add(extremal_pair)
         unused = set()
-        for neighboring_pair in neighboring_pairs of the mached: ############3
-            if neighboring_pair in used:
-                continue
-            if neighboring_pair[0] in matched_node1s:
-                continue
-            if neighboring_pair[1] in matched_node2s:
-                continue
-            unused.add(neighboring_pair)
+        print "begin creation of unused"
+        t3 = 0
+        for matched_pair in matched:
+            t3 += 1
+            print "t3: ", t3
+            for neighbor_tup in itertools.product(net1.neighbors(matched_pair[0]), net2.neighbors(matched_pair[1])):
+                if neighbor_tup in used:
+                    continue
+                if neighbor_tup[0] in matched_node1s:
+                    continue
+                if neighbor_tup[1] in matched_node2s:
+                    continue
+                unused.add(neighbor_tup)
     return matched
 
 def generate_skg_arr(order=11):
@@ -287,4 +319,4 @@ if __name__ == "__main__":
     rtg_2 = generate_rtg()
     rtg_1, rtg_2 = add_dummies(rtg_1, rtg_2)
     seeds = generate_seeds(rtg_1, rtg_2)
-    print "now go do expando_pgm properly"
+    print expando_pgm(rtg_1, rtg_2, seeds)
