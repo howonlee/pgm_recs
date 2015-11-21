@@ -116,7 +116,7 @@ def energy_diff_wrapper(src_net, tgt_net):
         return total
     return energy, total_energy
 
-def search_annealing(src_net, tgt_net, biggest_matching, num_tries=2, num_iters=10000):
+def search_annealing(src_net, tgt_net, biggest_matching, num_tries=20, num_iters=10000):
     """
     Currently just gradient descent
     """
@@ -211,14 +211,15 @@ def expando_pgm(net1, net2, seeds): #seeds is a list of tups
                 print "t2: ", t2
             most_common_pairs = marks.most_common(30)
             extremal_pair = sorted(map(op.itemgetter(0), most_common_pairs), key=net_curried)[0]
-            matched.add(extremal_pair)
-            marks[extremal_pair] = 0
-            matched_node1s.add(extremal_pair[0])
-            matched_node2s.add(extremal_pair[1])
-            if extremal_pair not in used:
-                for neighbor_tup in itertools.product(net1.neighbors(extremal_pair[0]), net2.neighbors(extremal_pair[1])):
-                    incr_mark(neighbor_tup)
-                used.add(extremal_pair)
+            del marks[extremal_pair]
+            if not used_tup(extremal_pair):
+                matched.add(extremal_pair)
+                matched_node1s.add(extremal_pair[0])
+                matched_node2s.add(extremal_pair[1])
+                if extremal_pair not in used:
+                    for neighbor_tup in itertools.product(net1.neighbors(extremal_pair[0]), net2.neighbors(extremal_pair[1])):
+                        incr_mark(neighbor_tup)
+                    used.add(extremal_pair)
         unused = set()
         print "begin creation of unused"
         t3 = 0
@@ -317,11 +318,12 @@ def add_dummies(net1, net2):
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
     rtg_1 = generate_rtg()
-    rtg_2 = generate_rtg()
+    rtg_2 = select_net(rtg_1)
     rtg_1, rtg_2 = add_dummies(rtg_1, rtg_2)
     seeds = generate_seeds(rtg_1, rtg_2, 40)
     expando_res = expando_pgm(rtg_1, rtg_2, seeds)
     print expando_res
     print len(expando_res)
+    print len([x for x in expando_res if x[0] == x[1]])
     print len(rtg_1.nodes())
     print len(rtg_2.nodes())
