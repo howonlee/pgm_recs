@@ -34,6 +34,10 @@ def l2_norm(x, y):
     #because I am too lazy to actually figure out how to do it with np norm
     return np.sqrt(x ** 2 + y ** 2)
 
+def cos_dist(fst, snd):
+    intersection = len(set(fst).intersection(set(snd)))
+    return float(intersection) / np.sqrt(len(fst) * len(snd))
+
 def generate_biggest_matching(src_net, tgt_net, num_seeds):
     src_degs = map(op.itemgetter(0), sorted(nx.degree(src_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
     tgt_degs = map(op.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
@@ -73,10 +77,6 @@ def generate_matching_neighbors(matching, num_neighbors=20):
             tgt_words[first], tgt_words[second] = tgt_words[second], tgt_words[first]
         neighbors.append(zip(src_words, tgt_words))
     return neighbors
-
-def cos_dist(fst, snd):
-    intersection = len(set(fst).intersection(set(snd)))
-    return float(intersection) / np.sqrt(len(fst) * len(snd))
 
 def cosine_mat(net):
     neighborhoods = {}
@@ -179,7 +179,6 @@ def expando_pgm(net1, net2, seeds): #seeds is a list of tups
     matched_node1s = set(map(op.itemgetter(0), seeds))
     matched_node2s = set(map(op.itemgetter(1), seeds))
     used = set()
-    # The key is _BOTH_ the neighbor and the count of the neighbor
     marks = collections.Counter()
     def incr_mark(neighbor_tup):
         if neighbor_tup[0] in matched_node1s:
