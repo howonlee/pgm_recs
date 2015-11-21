@@ -140,7 +140,7 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=2, num_iters=
     best_matching = min(all_matchings, key=op.itemgetter(0))[1]
     return best_matching
 
-def generate_seeds(src_net, tgt_net, num_seeds=50):
+def generate_seeds(src_net, tgt_net, num_seeds):
     matching = generate_biggest_matching(src_net, tgt_net, num_seeds)
     return search_annealing(src_net, tgt_net, matching)
 
@@ -177,14 +177,21 @@ def expando_pgm(net1, net2, seeds): #seeds is a list of tups
     matched_node2s = set(map(op.itemgetter(1), seeds))
     used = set()
     # The key is _BOTH_ the neighbor and the count of the neighbor
-    marks_keys = collections.Counter()
-    marks_sorted = sorteddict(key=lambda x: marks_keys[x])
+    marks = collections.Counter()
     def incr_mark(neighbor_tup):
-        marks_keys[neighbor_tup] += 1
-        if neighbor_tup in marks_sorted:
-            marks_sorted[neighbor_tup] += 1
-        else:
-            marks_sorted[neighbor_tup] = 1
+        if neighbor_tup[0] in matched_node1s:
+            return
+        if neighbor_tup[1] in matched_node2s:
+            return
+        marks[neighbor_tup] += 1
+    def used_tup(neighbor_tup):
+        if neighbor_tup in used:
+            return True
+        if neighbor_tup[0] in matched_node1s:
+            return True
+        if neighbor_tup[1] in matched_node2s:
+            return True
+        return False
     # now, is this currying or is this partial function application?
     # who the fuck knows
     net_curried = lambda x: net_degree_dist(net1, net2, x)
@@ -192,22 +199,20 @@ def expando_pgm(net1, net2, seeds): #seeds is a list of tups
         print "begin init unused neighbor marking"
         t1 = 0
         for curr_pair in unused:
-            t1 += 1
-            print "t1: ", t1
             used.add(curr_pair)
             for neighbor_tup in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
                 incr_mark(neighbor_tup)
         print "begin extremal pair counting"
         t2 = 0
         # do the heapqueue stuff without the marks
-        while marks_sorted.keys()[0] >= 2:
+        while max(marks.values()) >= 2:
             t2 += 1
-            if t2 % 30000 == 0:
+            if t2 % 100 == 0:
                 print "t2: ", t2
-                print matched
-            most_common_pairs = marks_sorted.keys()[:30]
-            extremal_pair = sorted(list(most_common_pairs)[1:], key=net_curried)[0]
+            most_common_pairs = marks.most_common(30)
+            extremal_pair = sorted(map(op.itemgetter(0), most_common_pairs), key=net_curried)[0]
             matched.add(extremal_pair)
+            marks[extremal_pair] = 0
             matched_node1s.add(extremal_pair[0])
             matched_node2s.add(extremal_pair[1])
             if extremal_pair not in used:
@@ -221,11 +226,7 @@ def expando_pgm(net1, net2, seeds): #seeds is a list of tups
             t3 += 1
             print "t3: ", t3
             for neighbor_tup in itertools.product(net1.neighbors(matched_pair[0]), net2.neighbors(matched_pair[1])):
-                if neighbor_tup in used:
-                    continue
-                if neighbor_tup[0] in matched_node1s:
-                    continue
-                if neighbor_tup[1] in matched_node2s:
+                if used_tup(neighbor_tup):
                     continue
                 unused.add(neighbor_tup)
     return matched
@@ -318,5 +319,9 @@ if __name__ == "__main__":
     rtg_1 = generate_rtg()
     rtg_2 = generate_rtg()
     rtg_1, rtg_2 = add_dummies(rtg_1, rtg_2)
-    seeds = generate_seeds(rtg_1, rtg_2)
-    print expando_pgm(rtg_1, rtg_2, seeds)
+    seeds = generate_seeds(rtg_1, rtg_2, 40)
+    expando_res = expando_pgm(rtg_1, rtg_2, seeds)
+    print expando_res
+    print len(expando_res)
+    print len(rtg_1.nodes())
+    print len(rtg_2.nodes())
