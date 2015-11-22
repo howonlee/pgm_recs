@@ -159,17 +159,28 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
     while unused:
         t2 = 0
         curr_pair = unused.pop()
+        prod_len = len(net1.neighbors(curr_pair[0])) * len(net2.neighbors(curr_pair[0]))
         for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
             if neighbor[0] in imp_t or neighbor[1] in imp_h:
                 continue
             marks[neighbor] += 1
             t2 += 1
             if t2 % 100000 == 0:
-                print "t2: ", t2
+                memsize = sys.getsizeof(marks)
+                print "t2 , mem size, prod_len : ", t2, memsize, prod_len
+                if memsize > 1200000000:
+                    new_marks = collections.defaultdict(int)
+                    for key, val in marks.iteritems():
+                        if val > 1:
+                            new_marks[key] = val
+                    del marks
+                    marks = new_marks
+                    print "new marks made"
             if marks[neighbor] > r:
                 unused.append(neighbor)
                 imp_t.add(neighbor[0])
                 imp_h.add(neighbor[1])
+                continue
         used.append(curr_pair)
     return used
 
@@ -244,7 +255,7 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words.split())
 
-def generate_wordnet(filename="data/corpus.txt", num_words=50000):
+def generate_wordnet(filename="data/corpus.txt", num_words=-1):
     with open(filename) as corpus_file:
         corpus = corpus_file.read()
     return wash_words(corpus.split()[:num_words])
