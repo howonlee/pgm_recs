@@ -4,6 +4,7 @@ import numpy.random as npr
 import sys
 import math
 import random
+import nltk
 import collections
 import matplotlib.pyplot as plt
 import itertools
@@ -41,6 +42,11 @@ def cos_dist(fst, snd):
 def generate_biggest_matching(src_net, tgt_net, num_seeds):
     src_degs = map(op.itemgetter(0), sorted(nx.degree(src_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
     tgt_degs = map(op.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1), reverse=True)[:num_seeds])
+    return zip(src_degs, tgt_degs)
+
+def generate_smallest_matching(src_net, tgt_net, num_seeds):
+    src_degs = map(op.itemgetter(0), sorted(nx.degree(src_net).items(), key=op.itemgetter(1))[:num_seeds])
+    tgt_degs = map(op.itemgetter(0), sorted(nx.degree(tgt_net).items(), key=op.itemgetter(1))[:num_seeds])
     return zip(src_degs, tgt_degs)
 
 def generate_possible_swap(matching):
@@ -184,6 +190,43 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
         used.append(curr_pair)
     return used
 
+def expando_pgm(net1, net2, seeds, r):
+    """
+    Modification of expando PGM, anyhow
+    """
+    marks = collections.defaultdict(int)
+    marks = collections.defaultdict(int)
+    imp_t, imp_h = set(), set()
+    unused, used, matches = seeds[:], [], []
+    random.shuffle(unused) # mutation!
+    while unused:
+        t2 = 0
+        curr_pair = unused.pop()
+        prod_len = len(net1.neighbors(curr_pair[0])) * len(net2.neighbors(curr_pair[0]))
+        for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
+            if neighbor[0] in imp_t or neighbor[1] in imp_h:
+                continue
+            marks[neighbor] += 1
+            t2 += 1
+            if t2 % 100000 == 0:
+                memsize = sys.getsizeof(marks)
+                print "t2 , mem size, prod_len : ", t2, memsize, prod_len
+                if memsize > 1200000000:
+                    new_marks = collections.defaultdict(int)
+                    for key, val in marks.iteritems():
+                        if val > 1:
+                            new_marks[key] = val
+                    del marks
+                    marks = new_marks
+                    print "new marks made"
+            if marks[neighbor] > r:
+                unused.append(neighbor)
+                imp_t.add(neighbor[0])
+                imp_h.add(neighbor[1])
+                continue
+        used.append(curr_pair)
+    return used
+
 def generate_skg_arr(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
     skg = gen.copy()
@@ -278,7 +321,7 @@ if __name__ == "__main__":
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
     seeds = generate_biggest_matching(wordnet_1, wordnet_2, 40)
-    res = normal_pgm(wordnet_1, wordnet_2, seeds, 7)
+    res = normal_pgm(wordnet_1, wordnet_2, seeds, 2)
     print res
     print len(res)
     print len([x for x in res if x[0] == x[1]])
