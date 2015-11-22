@@ -195,7 +195,7 @@ def expando_pgm(net1, net2, seeds, r):
     Modification of expando PGM, anyhow
     """
     marks = collections.defaultdict(int)
-    marks = collections.defaultdict(int)
+    matches = collections.defaultdict(int)
     imp_t, imp_h = set(), set()
     unused, used, matches = seeds[:], [], []
     random.shuffle(unused) # mutation!
@@ -225,7 +225,7 @@ def expando_pgm(net1, net2, seeds, r):
                 imp_h.add(neighbor[1])
                 continue
         used.append(curr_pair)
-    return used
+    return matches
 
 def generate_skg_arr(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
