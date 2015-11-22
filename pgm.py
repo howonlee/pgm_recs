@@ -255,7 +255,7 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words.split())
 
-def generate_wordnet(filename="data/corpus.txt", num_words=-1):
+def generate_wordnet(filename="data/corpus.txt", num_words=40000):
     with open(filename) as corpus_file:
         corpus = corpus_file.read()
     return wash_words(corpus.split()[:num_words])
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
     seeds = generate_biggest_matching(wordnet_1, wordnet_2, 40)
-    res = normal_pgm(wordnet_1, wordnet_2, seeds, 5)
+    res = normal_pgm(wordnet_1, wordnet_2, seeds, 7)
     print res
     print len(res)
     print len([x for x in res if x[0] == x[1]])
