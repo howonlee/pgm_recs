@@ -145,6 +145,7 @@ def search_annealing(src_net, tgt_net, biggest_matching, num_tries=20, num_iters
 
 def generate_seeds(src_net, tgt_net, num_seeds):
     matching = generate_biggest_matching(src_net, tgt_net, num_seeds)
+    print matching
     return search_annealing(src_net, tgt_net, matching)
 
 def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
@@ -163,76 +164,14 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
                 continue
             marks[neighbor] += 1
             t2 += 1
+            if t2 % 100000 == 0:
+                print "t2: ", t2
             if marks[neighbor] > r:
                 unused.append(neighbor)
                 imp_t.add(neighbor[0])
                 imp_h.add(neighbor[1])
         used.append(curr_pair)
     return used
-
-def net_degree_dist(net1, net2, pair):
-    return abs(net1.degree(pair[0]) - net2.degree(pair[1]))
-
-def expando_pgm(net1, net2, seeds): #seeds is a list of tups
-    unused = set(seeds[:])
-    matched = set(seeds[:])
-    matched_node1s = set(map(op.itemgetter(0), seeds))
-    matched_node2s = set(map(op.itemgetter(1), seeds))
-    used = set()
-    marks = collections.Counter()
-    def incr_mark(neighbor_tup):
-        if neighbor_tup[0] in matched_node1s:
-            return
-        if neighbor_tup[1] in matched_node2s:
-            return
-        marks[neighbor_tup] += 1
-    def used_tup(neighbor_tup):
-        if neighbor_tup in used:
-            return True
-        if neighbor_tup[0] in matched_node1s:
-            return True
-        if neighbor_tup[1] in matched_node2s:
-            return True
-        return False
-    # now, is this currying or is this partial function application?
-    # who the fuck knows
-    net_curried = lambda x: net_degree_dist(net1, net2, x)
-    while unused:
-        print "begin init unused neighbor marking"
-        t1 = 0
-        for curr_pair in unused:
-            used.add(curr_pair)
-            for neighbor_tup in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
-                incr_mark(neighbor_tup)
-        print "begin extremal pair counting"
-        t2 = 0
-        # do the heapqueue stuff without the marks
-        while max(marks.values()) >= 2:
-            t2 += 1
-            if t2 % 100 == 0:
-                print "t2: ", t2
-            most_common_pairs = marks.most_common(30)
-            extremal_pair = sorted(map(op.itemgetter(0), most_common_pairs), key=net_curried)[0]
-            del marks[extremal_pair]
-            if not used_tup(extremal_pair):
-                matched.add(extremal_pair)
-                matched_node1s.add(extremal_pair[0])
-                matched_node2s.add(extremal_pair[1])
-                if extremal_pair not in used:
-                    for neighbor_tup in itertools.product(net1.neighbors(extremal_pair[0]), net2.neighbors(extremal_pair[1])):
-                        incr_mark(neighbor_tup)
-                    used.add(extremal_pair)
-        unused = set()
-        print "begin creation of unused"
-        t3 = 0
-        for matched_pair in matched:
-            t3 += 1
-            print "t3: ", t3
-            for neighbor_tup in itertools.product(net1.neighbors(matched_pair[0]), net2.neighbors(matched_pair[1])):
-                if used_tup(neighbor_tup):
-                    continue
-                unused.add(neighbor_tup)
-    return matched
 
 def generate_skg_arr(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
@@ -250,7 +189,7 @@ def generate_skg_net(order=11):
     arr = generate_skg_arr(order)
     return nx.from_numpy_matrix(arr)
 
-def read_small_data(sample=4000, offset=0):
+def read_recdata_sample(sample=4000, offset=0):
     """
     Got to arrange this for the user (or item) similarities, have a threshhold for similarities
     """
@@ -286,11 +225,10 @@ def generate_rtg_words(length):
     members = "abcd "
     return "".join(members[choice] for choice in choices)
 
-def wash_words(letters):
+def wash_words(words):
     """
     Takes a sequence that can be split and turns it into a bigram network
     """
-    words = letters.split()
     word_map = dict([(tup[1], tup[0]) for tup in enumerate(set(words))])
     net = nx.Graph()
     for word1, word2 in zip(words, words[1:]):
@@ -304,7 +242,12 @@ def generate_rtg(length=10000):
     Really rudimentary, I forget which of the various RTG versions this is
     """
     rtg_words = generate_rtg_words(length)
-    return wash_words(rtg_words)
+    return wash_words(rtg_words.split())
+
+def generate_wordnet(filename="data/corpus.txt", num_words=50000):
+    with open(filename) as corpus_file:
+        corpus = corpus_file.read()
+    return wash_words(corpus.split()[:num_words])
 
 def add_dummies(net1, net2):
     dummified_net1, dummified_net2 = net1.copy(), net2.copy()
@@ -319,13 +262,13 @@ def add_dummies(net1, net2):
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    rtg_1 = generate_rtg()
-    rtg_2 = select_net(rtg_1)
-    rtg_1, rtg_2 = add_dummies(rtg_1, rtg_2)
-    seeds = generate_seeds(rtg_1, rtg_2, 40)
-    expando_res = expando_pgm(rtg_1, rtg_2, seeds)
-    print expando_res
-    print len(expando_res)
-    print len([x for x in expando_res if x[0] == x[1]])
-    print len(rtg_1.nodes())
-    print len(rtg_2.nodes())
+    wordnet_1 = generate_wordnet()
+    wordnet_2 = select_net(wordnet_1)
+    # expando is supposed to be durable to bad seeds
+    # so let's lazily have some bad seeds
+    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 40)
+    res = normal_pgm(wordnet_1, wordnet_2, seeds, 5)
+    print res
+    print len(res)
+    print len([x for x in res if x[0] == x[1]])
+    print len(wordnet_1.nodes())
