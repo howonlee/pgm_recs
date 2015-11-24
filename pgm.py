@@ -190,7 +190,7 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
         used.append(curr_pair)
     return used
 
-def expando_pgm(net1, net2, seeds, r):
+def noisy_seeds(net1, net2, seeds, r):
     """
     Modification of expando PGM, anyhow
     """
