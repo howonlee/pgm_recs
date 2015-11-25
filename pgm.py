@@ -191,41 +191,34 @@ def normal_pgm(net1, net2, seeds, r): #seeds is a list of tups
     return used
 
 def noisy_seeds(net1, net2, seeds, r):
-    """
-    Modification of expando PGM, anyhow
-    """
     marks = collections.defaultdict(int)
-    matches = collections.defaultdict(int)
     imp_t, imp_h = set(), set()
-    unused, used, matches = seeds[:], [], []
-    random.shuffle(unused) # mutation!
-    while unused:
-        t2 = 0
-        curr_pair = unused.pop()
-        prod_len = len(net1.neighbors(curr_pair[0])) * len(net2.neighbors(curr_pair[0]))
-        for neighbor in itertools.product(net1.neighbors(curr_pair[0]), net2.neighbors(curr_pair[1])):
+    unused, used, matches = set(seeds[:]), set(), set()
+    def add_neighbor_marks(pair):
+        print "pair: ", pair
+        for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
             if neighbor[0] in imp_t or neighbor[1] in imp_h:
                 continue
             marks[neighbor] += 1
-            t2 += 1
-            if t2 % 100000 == 0:
-                memsize = sys.getsizeof(marks)
-                print "t2 , mem size, prod_len : ", t2, memsize, prod_len
-                if memsize > 1200000000:
-                    new_marks = collections.defaultdict(int)
-                    for key, val in marks.iteritems():
-                        if val > 1:
-                            new_marks[key] = val
-                    del marks
-                    marks = new_marks
-                    print "new marks made"
-            if marks[neighbor] > r:
-                unused.append(neighbor)
+            if marks[neighbor] >= r:
+                matches.add(neighbor)
                 imp_t.add(neighbor[0])
                 imp_h.add(neighbor[1])
-                continue
-        used.append(curr_pair)
-    return matches
+    print "begin stage 0"
+    while unused:
+        t2 = 0
+        curr_pair = unused.pop()
+        add_neighbor_marks(curr_pair)
+        used.add(curr_pair)
+    match_diff = matches - used
+    print "begin stage 1"
+    while match_diff:
+        curr_pair = match_diff.pop()
+        used.add(curr_pair)
+        add_neighbor_marks(curr_pair)
+        match_diff = matches - used
+        print len(match_diff)
+    return list(matches)
 
 def generate_skg_arr(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
@@ -298,7 +291,7 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words.split())
 
-def generate_wordnet(filename="data/corpus.txt", num_words=40000):
+def generate_wordnet(filename="data/corpus.txt", num_words=200000):
     with open(filename) as corpus_file:
         corpus = corpus_file.read()
     return wash_words(corpus.split()[:num_words])
@@ -320,8 +313,8 @@ if __name__ == "__main__":
     wordnet_2 = select_net(wordnet_1)
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
-    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 40)
-    res = normal_pgm(wordnet_1, wordnet_2, seeds, 2)
+    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 10)
+    res = noisy_seeds(wordnet_1, wordnet_2, seeds, 6)
     print res
     print len(res)
     print len([x for x in res if x[0] == x[1]])
