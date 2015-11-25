@@ -196,6 +196,7 @@ def noisy_seeds(net1, net2, seeds, r):
     unused, used, matches = set(seeds[:]), set(), set()
     def add_neighbor_marks(pair):
         print "pair: ", pair
+        ct = 0
         for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
             if neighbor[0] in imp_t or neighbor[1] in imp_h:
                 continue
@@ -219,6 +220,9 @@ def noisy_seeds(net1, net2, seeds, r):
         match_diff = matches - used
         print len(match_diff)
     return list(matches)
+
+def expand_when_stuck(net1, net2, seeds, r):
+    pass
 
 def generate_skg_arr(order=11):
     gen = np.array([[0.99, 0.7], [0.7, 0.1]])
@@ -280,7 +284,7 @@ def wash_words(words):
     net = nx.Graph()
     for word1, word2 in zip(words, words[1:]):
         net.add_edge(word_map[word1], word_map[word2])
-    return net
+    return net, word_map
 
 # cap the length and try the extra thought
 def generate_rtg(length=10000):
@@ -291,7 +295,7 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words.split())
 
-def generate_wordnet(filename="data/corpus.txt", num_words=200000):
+def generate_wordnet(filename="data/corpus.txt", num_words=50000):
     with open(filename) as corpus_file:
         corpus = corpus_file.read()
     return wash_words(corpus.split()[:num_words])
@@ -309,13 +313,16 @@ def add_dummies(net1, net2):
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    wordnet_1 = generate_wordnet()
+    wordnet_1, mapping = generate_wordnet()
+    inv_mapping = {v:k for k, v in mapping.iteritems()}
     wordnet_2 = select_net(wordnet_1)
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
-    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 10)
-    res = noisy_seeds(wordnet_1, wordnet_2, seeds, 6)
+    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 100)
+    res = noisy_seeds(wordnet_1, wordnet_2, seeds, 2)
     print res
+    eq_mappings = [x for x in res if x[0] == x[1]]
+    print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
     print len(res)
-    print len([x for x in res if x[0] == x[1]])
+    print len(eq_mappings)
     print len(wordnet_1.nodes())
