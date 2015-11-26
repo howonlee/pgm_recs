@@ -230,12 +230,13 @@ def expand_when_stuck(net1, net2, seeds):
     unused, used, matches = set(seeds[:]), set(), set()
     net_curried = lambda x: net_degree_dist(net1, net2, x)
 
-    def add_neighbor_marks(pair):
+    def add_neighbor_marks(pair, disp=False):
         ct = 0
-        print "add_neighbor_marks pair: ", pair
+        if disp:
+            print "add_neighbor_marks pair: ", pair
         for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
             ct += 1
-            if ct % 100000 == 0:
+            if ct % 100000 == 0 and disp:
                 print "add_neighbor_marks ct: ", ct
             if neighbor[0] in imp_t or neighbor[1] in imp_h:
                 continue
@@ -280,7 +281,7 @@ def expand_when_stuck(net1, net2, seeds):
     while unused:
         print "len unused: ", len(unused)
         for curr_pair in unused:
-            add_neighbor_marks(curr_pair)
+            add_neighbor_marks(curr_pair, disp=True)
             used.add(curr_pair)
         marks, used, new_matches = get_new_matches(marks, used)
         matches = matches.union(new_matches)
@@ -303,6 +304,16 @@ def generate_skg_arr(order=11):
 
 def generate_skg_net(order=11):
     arr = generate_skg_arr(order)
+    return nx.from_numpy_matrix(arr)
+
+def skg_like(net):
+    """
+    Pretty naive implementation
+    Only works for order like 11 or something
+    """
+    net_len = len(net.nodes())
+    order = int(np.ceil(np.log2(net_len)))
+    arr = generate_skg_arr(order)[:net_len, :net_len]
     return nx.from_numpy_matrix(arr)
 
 def read_recdata_sample(sample=4000, offset=0):
@@ -378,15 +389,13 @@ def add_dummies(net1, net2):
 
 if __name__ == "__main__":
     random.seed(123456) #different seed :)
-    wordnet_1, mapping = generate_wordnet()
+    wordnet, mapping = generate_wordnet()
+    skg_net = skg_like(wordnet)
     inv_mapping = {v:k for k, v in mapping.iteritems()}
-    wordnet_2 = select_net(wordnet_1)
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
-    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 20)
-    res = expand_when_stuck(wordnet_1, wordnet_2, seeds)
-    eq_mappings = [x for x in res if x[0] == x[1]]
-    print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
+    seeds = generate_biggest_matching(wordnet, skg_net, 20)
+    res = expand_when_stuck(wordnet, skg_net, seeds)
+    print map(lambda x: (inv_mapping[x[0]], x[1]), res)
     print "length of res: ", len(res)
-    print "length of eq mappings: ", len(eq_mappings)
-    print "length of wordnet 1: ", len(wordnet_1.nodes())
+    print "length of wordnet 1: ", len(wordnet.nodes())
