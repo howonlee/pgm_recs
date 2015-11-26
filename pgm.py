@@ -343,15 +343,6 @@ def read_recdata_sample(sample=4000, offset=0):
     # similarities. Now.
     return net
 
-def generate_rtg_words(length):
-    """
-    Generates the words for the RTG
-    """
-    probs = np.array([0.2, 0.1, 0.1, 0.3, 0.3])
-    choices = map(int, list(npr.choice(5, length, p=probs)))
-    members = "abcd "
-    return "".join(members[choice] for choice in choices)
-
 def wash_words(words):
     """
     Takes a sequence that can be split and turns it into a bigram network
@@ -361,15 +352,6 @@ def wash_words(words):
     for word1, word2 in zip(words, words[1:]):
         net.add_edge(word_map[word1], word_map[word2])
     return net, word_map
-
-# cap the length and try the extra thought
-def generate_rtg(length=10000):
-    """
-    Generate a Random Typer Graph a la Akoglu et al
-    Really rudimentary, I forget which of the various RTG versions this is
-    """
-    rtg_words = generate_rtg_words(length)
-    return wash_words(rtg_words.split())
 
 def generate_wordnet(filename="data/corpus.txt", num_words=20000):
     with open(filename) as corpus_file:
