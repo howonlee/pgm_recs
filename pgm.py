@@ -12,7 +12,7 @@ import scipy.stats as sci_st
 import operator as op
 import cProfile
 import dtw
-from blist import sortedset
+from blist import sortedlist
 
 def select_net(net, p=0.9):
     """
@@ -221,11 +221,15 @@ def noisy_seeds(net1, net2, seeds, r):
         print len(match_diff)
     return list(matches)
 
+def net_degree_dist(net1, net2, pair):
+    return abs(net1.degree(pair[0]) - net2.degree(pair[1]))
+
 def expand_when_stuck(net1, net2, seeds):
     marks_dict = collections.defaultdict(int)
-    marks_sorted = sortedset(key=lambda x: -x[1])
+    marks_sorted = sortedlist(key=lambda x: -x[1])
     imp_t, imp_h = set(), set()
     unused, used, matches = set(seeds[:]), set(), set()
+    net_curried = lambda x: net_degree_dist(net1, net2, x)
     def add_neighbor_marks(pair):
         print "pair: ", pair
         for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
@@ -243,11 +247,11 @@ def expand_when_stuck(net1, net2, seeds):
             used.add(curr_pair)
         print "begin stage 1"
         while len(marks_sorted) and marks_sorted[0][1] >= 2:
-            curr_pair = marks_sorted.pop()[0]
-            if curr_pair[0] in imp_t:
-                continue
-            if curr_pair[1] in imp_h:
-                continue
+            cand_pairs = [scored_mark[0] for scored_mark in marks_sorted[0:100] if scored_mark[0][0] not in imp_t and scored_mark[0][1] not in imp_h]
+            if not cand_pairs:
+                break
+            cand_pairs = sorted(cand_pairs, key=net_curried)
+            curr_pair = cand_pairs[0]
             imp_t.add(curr_pair[0])
             imp_h.add(curr_pair[1])
             del marks_dict[curr_pair]
@@ -329,7 +333,7 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words.split())
 
-def generate_wordnet(filename="data/corpus.txt", num_words=1000):
+def generate_wordnet(filename="data/corpus.txt", num_words=2000):
     with open(filename) as corpus_file:
         corpus = corpus_file.read()
     return wash_words(corpus.split()[:num_words])
@@ -353,10 +357,10 @@ if __name__ == "__main__":
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
     seeds = generate_biggest_matching(wordnet_1, wordnet_2, 10)
-    res = expand_when_stuck(wordnet_1, wordnet_2, seeds)
-    print res
-    eq_mappings = [x for x in res if x[0] == x[1]]
-    print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
-    print len(res)
-    print len(eq_mappings)
-    print len(wordnet_1.nodes())
+    cProfile.run("res = expand_when_stuck(wordnet_1, wordnet_2, seeds)")
+    #print res
+    #eq_mappings = [x for x in res if x[0] == x[1]]
+    #print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
+    #print len(res)
+    #print len(eq_mappings)
+    #print len(wordnet_1.nodes())
