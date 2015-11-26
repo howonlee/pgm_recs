@@ -12,7 +12,7 @@ import scipy.stats as sci_st
 import operator as op
 import cProfile
 import dtw
-from blist import sorteddict
+from blist import sortedset
 
 def select_net(net, p=0.9):
     """
@@ -222,34 +222,40 @@ def noisy_seeds(net1, net2, seeds, r):
     return list(matches)
 
 def expand_when_stuck(net1, net2, seeds):
-    marks = collections.defaultdict(int)
+    marks_dict = collections.defaultdict(int)
+    marks_sorted = sortedset(key=lambda x: -x[1])
     imp_t, imp_h = set(), set()
     unused, used, matches = set(seeds[:]), set(), set()
     def add_neighbor_marks(pair):
         print "pair: ", pair
-        ct = 0
         for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
             if neighbor[0] in imp_t or neighbor[1] in imp_h:
                 continue
-            marks[neighbor] += 1
-            if marks[neighbor] >= r:
-                matches.add(neighbor)
-                imp_t.add(neighbor[0])
-                imp_h.add(neighbor[1])
+            if marks_dict[neighbor] > 0:
+                marks_sorted.remove((neighbor, marks_dict[neighbor]))
+            marks_dict[neighbor] += 1
+            marks_sorted.add((neighbor, marks_dict[neighbor]))
     print "begin stage 0"
     while unused:
-        t2 = 0
-        curr_pair = unused.pop()
-        add_neighbor_marks(curr_pair)
-        used.add(curr_pair)
-    match_diff = matches - used
-    print "begin stage 1"
-    while match_diff:
-        curr_pair = match_diff.pop()
-        used.add(curr_pair)
-        add_neighbor_marks(curr_pair)
-        match_diff = matches - used
-        print len(match_diff)
+        print unused
+        for curr_pair in unused:
+            add_neighbor_marks(curr_pair)
+            used.add(curr_pair)
+        print "begin stage 1"
+        while len(marks_sorted) and marks_sorted[0][1] >= 2:
+            curr_pair = marks_sorted.pop()[0]
+            if curr_pair[0] in imp_t:
+                continue
+            if curr_pair[1] in imp_h:
+                continue
+            imp_t.add(curr_pair[0])
+            imp_h.add(curr_pair[1])
+            del marks_dict[curr_pair]
+            matches.add(curr_pair)
+            add_neighbor_marks(curr_pair)
+            used.add(curr_pair)
+        unused = [x for x in set(marks_dict.keys()) - used if x[0] not in imp_t and x[1] not in imp_h]
+        print len(unused)
     return list(matches)
 
 def generate_skg_arr(order=11):
@@ -323,7 +329,7 @@ def generate_rtg(length=10000):
     rtg_words = generate_rtg_words(length)
     return wash_words(rtg_words.split())
 
-def generate_wordnet(filename="data/corpus.txt", num_words=50000):
+def generate_wordnet(filename="data/corpus.txt", num_words=1000):
     with open(filename) as corpus_file:
         corpus = corpus_file.read()
     return wash_words(corpus.split()[:num_words])
@@ -346,8 +352,8 @@ if __name__ == "__main__":
     wordnet_2 = select_net(wordnet_1)
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
-    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 100)
-    res = noisy_seeds(wordnet_1, wordnet_2, seeds, 2)
+    seeds = generate_biggest_matching(wordnet_1, wordnet_2, 10)
+    res = expand_when_stuck(wordnet_1, wordnet_2, seeds)
     print res
     eq_mappings = [x for x in res if x[0] == x[1]]
     print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
