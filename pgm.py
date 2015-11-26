@@ -235,8 +235,6 @@ def expand_when_stuck(net1, net2, seeds):
         for neighbor in itertools.product(net1.neighbors(pair[0]), net2.neighbors(pair[1])):
             if neighbor[0] in imp_t or neighbor[1] in imp_h:
                 continue
-            if marks_dict[neighbor] > 0:
-                marks_sorted.remove((neighbor, marks_dict[neighbor]))
             marks_dict[neighbor] += 1
             marks_sorted.add((neighbor, marks_dict[neighbor]))
     print "begin stage 0"
@@ -258,8 +256,7 @@ def expand_when_stuck(net1, net2, seeds):
             matches.add(curr_pair)
             add_neighbor_marks(curr_pair)
             used.add(curr_pair)
-        unused = [x for x in set(marks_dict.keys()) - used if x[0] not in imp_t and x[1] not in imp_h]
-        print len(unused)
+        unused = something ############
     return list(matches)
 
 def generate_skg_arr(order=11):
@@ -357,10 +354,10 @@ if __name__ == "__main__":
     # expando is supposed to be durable to bad seeds
     # so let's lazily have some bad seeds
     seeds = generate_biggest_matching(wordnet_1, wordnet_2, 10)
-    cProfile.run("res = expand_when_stuck(wordnet_1, wordnet_2, seeds)")
-    #print res
-    #eq_mappings = [x for x in res if x[0] == x[1]]
-    #print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
-    #print len(res)
-    #print len(eq_mappings)
-    #print len(wordnet_1.nodes())
+    res = expand_when_stuck(wordnet_1, wordnet_2, seeds)
+    print res
+    eq_mappings = [x for x in res if x[0] == x[1]]
+    print map(lambda x: (inv_mapping[x[0]], inv_mapping[x[1]]), eq_mappings)
+    print len(res)
+    print len(eq_mappings)
+    print len(wordnet_1.nodes())
