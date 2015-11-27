@@ -1,0 +1,49 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\newcommand{\del}{\nabla}
+\begin{document}
+
+\title{Poking at Black Swans with Percolation}
+\author{Howon Lee}
+\maketitle
+
+What's original in this essay is not mine and what is mine is not original. I hope I've sourced everything enough so that you can also go through where I learned this.
+
+Consider a social network of humans, whether electronic like Facebook or real, like the one at your school or workplace. The electronic ones are better studied, because they are easier to study, and the folks who study this sort of thing tend to study it as a mathematical object. More specifically, they study social networks as graphs, with nodes and edges, where nodes are people and edges are relations between people. And wherever they have seen social networks, they have seen a set of strange properties. 
+
+1. They have seen a radical inequality in the distribution of the degrees (number of edges adjacent on each node) of the nodes, so that some nodes have a much larger proportion of the edges than others: a fat tail on the degree distribution, it is called (sometimes alleged to be a power law, although that is difficult to show).
+2. There are many more triangles in the graphs than would be expected at random, so if I know that you are a friend of a friend, then it is much more likely than random that I am a friend of you, too.
+3. It is much easier for any agent that spreads infectiously (actual infections as well as memes and things like that) to spread than would happen in a random graph.
+4. Because it is so easy to make a connection between any two huge communities and therefore glomp them together into one really huge community, there tends to come about a giant component to the graph.
+
+There are many others besides, but I think these are the only ones we need in this discussion. Very many networks besides also have these surprisingly-common properties, but social networks are the best studied because there's a lot of money in studying social networks and they're really interesting.
+
+Given these properties, many great theorists have thought deeply of the underlying generative process that creates them, starting from Simon and Yule, and possibly model them and their properties. I'm familiar indeed with a menagerie of them, from the Barabasi-Albert model to the Random Typing Graph (of L. Akoglu) to the Chung-Lu graph to the Exponential Random Graph to the Stochastic Kronecker graph.
+
+Of those graph models which attempt to model the strange properties of the social networks, all of them depend in some way on a positive feedback process to create the model in the first place. For example, the Barabasi-Albert model starts off with a tiny fully connected network, and adds nodes to the network one at a time following the principle of Matthew, or of preferential attachment: "to those who have much, more will be given". The probability a new node is connected to one of the old nodes is proportional to the number of nodes which already exist. 
+
+The same is also the case for the Stochastic Kronecker graph, which consists of looking at a possible network as an adjacency matrix (instead of merely a set of nodes and edges: two views of the same thing), drawing a stochastic fractal on the adjacency matrix, and looking at it as a set of nodes and edges again. Fractals have long been known to also be governed by the Matthew effect: look at the bottom edge of a Sierpinski triangle, which is almost all filled up because it was almost all filled up in a previous iteration of the expanding Sierpinski triangle.
+
+Now, I noted before that a radical inequality exists between the number of edges in each node of the network, where some nodes have very many edges and some other nodes have very few. This corresponds surprisingly well to another idea on radical inequalities, which is the concept of the Black Swan.
+
+Why? Extremistan. Social networks are something that definitively belongs to Extremistan definitely, because they do not travel towards a normative standard. Because they are connected as they are, radical things can happen in them in a very short amount of time - revolutions and revolts and grand social movements happen - not often, but more than people think they do - but the vast majority of social movements are tiny and sputter out.
+
+You can also tell by the strange behavior of averages. If I was in a room with a professional basketball player and you were to calculate the average height of the two people in the room, you would get something that wasn't far from the average height of the human population: this is Mediocrestan. If I was in a room with B. Obama and you were to calculate the average number of people-who-know-about-this-person in this room of two people, you would get a number that was very far from the average in the human population indeed.
+
+The black swan is often noted to be difficult or impossible to deal with computationally and statistically. NN Taleb advocates merely dealing with the possible effects of the black swan, but this piqued me intellectually, because there exists some pretty great tools to deal with, computationally and statistically, large social networks. The most interesting of them, I think, is percolation graph matching, which was first invented and used to de-anonymize social networks by A. Narayanan.
+
+So the Black Swan in this case can be attacked by percolation graph matching and the creation of an ansatz. Here is a tutorial on how to do so.
+
+The reason why this is an attractive method is that one node can have an effect on a long distance from another node viably. Depending on r previously matched nodes to spread, but those previously matched nodes in turn may have depended on some other nodes to spread, and on, until to get to another node which may be far away. More formally, a critical phase transition has been proved. This appeals to me intuitively a fair bunch.
+
+Here's a thing that may not have anything to do with anything. It's from J. Crutchfield of UC Davis and the Santa Fe Institute and it's been stuck in my head for quite the while.
+
+I do not really know how far you could actually apply this. Power laws and more generally, radical inequalities in distribution are pretty ubiquitous in natural phenomena, because they are the natural result of any positive feedback mechanism, and positive feedback is as common as negative feedback in nature. Many financial signals are governed by power law-distributed jumps, for example. The power spectra of many turbulent fluid signals are of a power law nature: this was noted and theorized on by Kolmogorov. In addition to social networks, there are software networks, biological networks, and economic networks which have parts and pieces of the strange patterns and phenomena that govern social networks.
+
+Probably a most important speculation is on the human brain. I read one day a very strange (but evidenced) speculation by G. Buzsaki, who noted that radically unequal distributions are pretty common in human cognition. He bases this, basically, on observed power law inheres in human reward discounting, on neural synaptic contacts, firing rates of individual neurons, synchronous discharge of neural populations, and in perception at a much higher level (Weber's law). I note that it may be possible to fit together PGM with, say, a Boltzmann machine or multilayer perceptron core, and that may be interesting and I will probably go on and do that next. I do not think that graph matching is such a fundamentally different problem from soft constraint satisfaction, which both the Boltzmann machine and multilayer perceptron was originally invented to solve, that a matching cannot be found.
+
+\end{document}
+
