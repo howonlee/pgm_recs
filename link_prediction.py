@@ -17,6 +17,9 @@ def predict_with_ansatz(sampled_net):
     return make_predictions(matching, sampled_net, ansatz_net)
 
 def print_acc(predictions, sampled_net, orig_net):
+    """
+    This is a bullshit accuracy, oh well
+    """
     raise NotImplementedError()
 
 if __name__ == "__main__":
