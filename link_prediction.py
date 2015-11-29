@@ -4,9 +4,9 @@ import pgm
 
 def make_prediction(matching, sampled_net, ansatz_net):
     predictions = []
+    matching_set = something
     for sample_elem, ansatz_elem in matching:
-        look at ansatz elem things
-        if ansatz elems is in matchings:
+        if ansatz elems is in matching_set:
             add to predictions
     return predictions
 
