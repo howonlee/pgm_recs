@@ -14,10 +14,12 @@ What's original in this essay is not mine and what is mine is not original. I ho
 
 Consider a social network, whether electronic, like Facebook or real, like the one at your school or workplace. The electronic ones are better studied because they are easier to study and there's more money in it. The folks who study social networks tend to study them as mathematical objects. More specifically, they study social networks as graphs, with nodes and edges, where nodes are people and edges are relations between people. And wherever they have seen social networks, they have seen some strange differences with respect to random networks.
 
-1. They have seen a radical inequality in the distribution of the degrees (number of edges adjacent on each node) of the nodes, so that some nodes have a much larger proportion of the edges than others: sometimes this is called a fat tail on the degree distribution (sometimes alleged to be a power law, although that is more difficult to show).
-2. There are many more triangles in the graphs than would be expected at random, so if I know that you are a friend of a friend, then it is much more likely than random that I am a friend of you, too. The same is true for a lot of more complicated small shapes.
-3. It is much easier for any agent that spreads infectiously (pathogens, memes, cultural norms, rumors, etc) to spread than would happen in a random graph.
-4. Because it is so easy to make a connection between any two huge communities and therefore glomp them together into one really huge community, there tends to come about a giant component to the graph which always has a path between any two nodes.
+\begin{enumerate}
+  \item They have seen a radical inequality in the distribution of the degrees (number of edges adjacent on each node) of the nodes, so that some nodes have a much larger proportion of the edges than others: sometimes this is called a fat tail on the degree distribution (sometimes alleged to be a power law, although that is more difficult to show).
+  \item There are many more triangles in the graphs than would be expected at random, so if I know that you are a friend of a friend, then it is much more likely than random that I am a friend of you, too. The same is true for a lot of more complicated small shapes.
+  \item It is much easier for any agent that spreads infectiously (pathogens, memes, cultural norms, rumors, etc) to spread than would happen in a random graph.
+  \item Because it is so easy to make a connection between any two huge communities and therefore glomp them together into one really huge community, there tends to come about a giant component to the graph which always has a path between any two nodes.
+\end{enumerate}
 
 There are many others besides, but I think these are the only ones we need in this discussion. Very many networks besides also have these surprisingly-common properties, but social networks are the best studied because there's a lot of money in studying social networks and they're really interesting.
 
@@ -33,13 +35,11 @@ You can also tell by the strange behavior of averages. If I was in a room with a
 
 The black swan is often noted to be difficult or impossible to deal with computationally and statistically. NN Taleb advocates merely dealing with the possible effects of the black swan, but this piqued me intellectually, because there exists some pretty great tools to deal with, computationally and statistically, large social networks. The most interesting of them, I think, is percolation graph matching, which was first invented and used to de-anonymize social networks by A. Narayanan.
 
-De-anonymization is defined this way. You have an actual network and two graphs which look pretty similar which you are told that are samples from the larger actual network. You have to match up nodes in the two graphs so that they correspond to the same node in the actual network. This is a very dire business doing it with real social networks. The reason why it is interesting is that it is, like many NP-complete problems, much easier than you get told in school that it is. See here as to why. The natural thought to have to listening to how it works is that _it seems somewhat limited in scope_, but I do not think this is the case, because you can match a real complex network up to a generated one on the other side of the matching.
+De-anonymization is defined this way. You have an actual network and two graphs which look pretty similar which you are told that are samples from the larger actual network. You have to match up nodes in the two graphs so that they correspond to the same node in the actual network. This is a very dire business doing it with real social networks. The reason why it is interesting is that it is, like many NP-complete problems, much easier than you get told in school that it is. See here as to why. The natural thought to have to listening to how it works is that \emph{it seems somewhat limited in scope}, but I do not think this is the case, because you can match a real complex network up to a generated one on the other side of the matching.
 
 The following is a tutorial on percolation graph matching. I also have ready and working code in a repo here.
 
-### tutorial goes inline
-
-#### try again at thinking about the rg stuff, the justification for why it's so great
+-- tutorial goes here
 
 I do not really know how far you could actually apply this. Power laws and more generally, radical inequalities in distribution are pretty ubiquitous in natural phenomena, because they are the natural result of any positive feedback mechanism, and positive feedback is as common as negative feedback in nature. Many financial signals are governed by power law-distributed jumps, for example. The power spectra of many turbulent fluid signals are of a power law nature: this was noted and theorized on by Kolmogorov. In addition to social networks, there are software networks, biological networks, and economic networks which have parts and pieces of the strange patterns and phenomena that govern social networks. But translating the spectral data and time series data to a coherent network representation is a pretty dire task, more difficult than ordinary discretization.
 
