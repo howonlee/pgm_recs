@@ -3,12 +3,15 @@ import networkx as nx
 import pgm
 
 def make_prediction(matching, sampled_net, ansatz_net):
-    predictions = []
-    matching_set = something
-    for sample_elem, ansatz_elem in matching:
-        if ansatz elems is in matching_set:
-            add to predictions
-    return predictions
+    print matching
+    return []
+    #predictions = []
+    #neighbors is something
+    #matching_set = set([x for _, x in matching])
+    #for sample_elem, ansatz_elem in matching:
+    #    if ansatz elems is in matching_set:
+    #        add the corresponding elements to predictions
+    #return predictions
 
 def predict_with_ansatz(sampled_net):
     ansatz_net = pgm.skg_like(sampled_net)
